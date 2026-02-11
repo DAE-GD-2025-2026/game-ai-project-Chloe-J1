@@ -64,4 +64,21 @@ SteeringOutput Arrive::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	return Steering;
 }
 
+//FACE
+//*******
+SteeringOutput Face::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
+{
+	Agent.SetIsAutoOrienting(false);
+	SteeringOutput Steering{};
+	double AngularVelocity{0.f};
+	FVector2D Destination = Target.Position - Agent.GetPosition();
+	double DeltaAngle{ atan2(Destination.Y - Agent.GetActorForwardVector().Y, Destination.X - Agent.GetActorForwardVector().X) };
+	
+	
+	
+	Steering.AngularVelocity = AngularVelocity;
+	return Steering;
+}
+
+
 // DrawDebugArrow/Direction ipv DrawDebugLine
