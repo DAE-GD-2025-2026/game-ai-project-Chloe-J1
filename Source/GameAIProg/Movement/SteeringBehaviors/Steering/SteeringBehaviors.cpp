@@ -33,7 +33,6 @@ SteeringOutput Arrive::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 {
 	const float SlowRadius{500.f};
 	const float TargetRadius{200.f};
-	const float dempValue{50.f};
 	
 	// Calculate regular speed
 	SteeringOutput Steering{};
@@ -70,14 +69,37 @@ SteeringOutput Face::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 {
 	Agent.SetIsAutoOrienting(false);
 	SteeringOutput Steering{};
+	const float Threshold{0.1f};
+	const float RotSpeed{80.f};
 	double AngularVelocity{0.f};
+	
+	
+	
+	FVector2D AgentForward(Agent.GetActorForwardVector().X, Agent.GetActorForwardVector().Y);
+
+	// calc delta angle
 	FVector2D Destination = Target.Position - Agent.GetPosition();
-	double DeltaAngle{ atan2(Destination.Y - Agent.GetActorForwardVector().Y, Destination.X - Agent.GetActorForwardVector().X) };
 	
+	double TargetAngle = FMath::Atan2(Destination.Y, Destination.X);
+	double ForwardAngle = FMath::Atan2(AgentForward.Y, AgentForward.X);
 	
+	double DeltaAngle = TargetAngle - ForwardAngle;
+	
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("dest: %f"), DeltaAngle));	
+	
+	if (abs(DeltaAngle) >= Threshold)
+	{
+		AngularVelocity =  RotSpeed * DeltaT;
+	}
+	else
+	{
+		AngularVelocity = 0.f;
+	}
 	
 	Steering.AngularVelocity = AngularVelocity;
 	return Steering;
+	
 }
 
 
