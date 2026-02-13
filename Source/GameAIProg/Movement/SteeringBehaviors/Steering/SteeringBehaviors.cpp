@@ -85,12 +85,12 @@ SteeringOutput Face::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	
 	double DeltaAngle = TargetAngle - ForwardAngle;
 	
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("dest: %f"), DeltaAngle));	
+	// if(GEngine)
+	// 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("dest: %f"), DeltaAngle));	
 	
 	if (abs(DeltaAngle) >= Threshold)
 	{
-		AngularVelocity =  RotSpeed * DeltaT;
+		AngularVelocity =  DeltaAngle * DeltaT * RotSpeed;
 	}
 	else
 	{
