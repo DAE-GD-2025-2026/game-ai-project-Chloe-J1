@@ -102,5 +102,13 @@ SteeringOutput Face::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	
 }
 
+//PURSUIT
+//*******
+SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
+{
+	SteeringOutput Steering{};
+	
+	return Steering;
+}
 
 // DrawDebugArrow/Direction ipv DrawDebugLine

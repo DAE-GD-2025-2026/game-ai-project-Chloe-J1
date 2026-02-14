@@ -22,6 +22,8 @@ void ALevel_Base::BeginPlay()
 
 	// Spawn our trimworld
 	TrimWorld = GetWorld()->SpawnActor<AWorldTrimVolume>(FVector{0,0,0}, FRotator::ZeroRotator);
+
+	
 }
 
 // Called every frame
