@@ -19,13 +19,13 @@ void ALevel_SteeringBehaviors::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Player controlled actor
+	// Agents
 	AddAgent(BehaviorTypes::Seek);
 	SteeringAgents[0].Agent->SetDebugRenderingEnabled(true);
-	
-	// NPC
+
 	AddAgent(BehaviorTypes::Seek);
-	SteeringAgents[1].Agent->SetDebugRenderingEnabled(false);
+	SteeringAgents[1].Agent->SetDebugRenderingEnabled(true);
+	SteeringAgents[1].Agent->SetActorLocation(FVector{500,100,0});
 }
 
 void ALevel_SteeringBehaviors::BeginDestroy()
@@ -245,6 +245,12 @@ void ALevel_SteeringBehaviors::SetAgentBehavior(ImGui_Agent& Agent)
 		break;
 	case BehaviorTypes::Pursuit:
 		Agent.Behavior = std::make_unique<Pursuit>();
+		break;
+	case BehaviorTypes::Evade:
+		Agent.Behavior = std::make_unique<Evade>();
+		break;
+	case BehaviorTypes::Wander:
+		Agent.Behavior = std::make_unique<Wander>();
 		break;
 		
 	default:
