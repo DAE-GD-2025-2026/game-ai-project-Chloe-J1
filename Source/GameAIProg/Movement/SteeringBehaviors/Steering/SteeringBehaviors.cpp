@@ -14,7 +14,11 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	if (Target.Position != FVector2D{0,0})
 		Steering.LinearVelocity = Target.Position - Agent.GetPosition();
 
-	
+	// Helper debug lines
+	constexpr float LineSize{100.f};
+	FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
+	FVector2D End = Agent.GetPosition() + Forward * LineSize;
+	DrawDebugDirectionalArrow(Agent.GetWorld(), FVector(Agent.GetPosition(),0), FVector(End.X, End.Y,0), 3.f, FColor::Green );
 
 	return Steering;
 }

@@ -75,3 +75,8 @@ void ASteeringAgent::SetSteeringBehavior(ISteeringBehavior* NewSteeringBehavior)
 	SteeringBehavior = NewSteeringBehavior;
 }
 
+ISteeringBehavior* ASteeringAgent::GetSteeringBehavior() const
+{
+	return SteeringBehavior;
+}
+
