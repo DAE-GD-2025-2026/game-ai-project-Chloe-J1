@@ -9,6 +9,7 @@
 
 SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 {
+	
 	SteeringOutput Steering{};
 	
 	if (Target.Position != FVector2D{0,0})
@@ -165,11 +166,14 @@ SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	FVector2D Center = Agent.GetPosition() + Forward * Radius + Offset;
 	float Angle = FMath::RandRange(MinAngle, MaxAngle);
 	
+	FVector2D oldTarget = Target.Position;
 	FVector2D RandPoint = FVector2D(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius) + Center;
-	
 	Target.Position = RandPoint;
 	
 	Steering = Seek::CalculateSteering(DeltaT, Agent);
+	
+	// Reset to initial target
+	Target.Position = oldTarget;
 	
 	// Draw Debug lines
 

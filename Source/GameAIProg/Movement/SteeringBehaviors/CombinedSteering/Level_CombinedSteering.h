@@ -41,6 +41,7 @@ private:
 		Evade,
 		Pursuit,
 		Face,
+		Blended,
 		// @ End
 		Count
 	};
@@ -55,6 +56,10 @@ private:
 	
 	std::vector<ImGui_Agent> SteeringAgents{};
 	std::vector<std::string> TargetLabels{};
+	BlendedSteering* pBlendedSteering{};
+	std::unique_ptr<Seek> pSeek{};
+	std::unique_ptr<Wander> pWander{};
+	std::vector<BlendedSteering::WeightedBehavior> TwoBehaviors;
 	
 	int AgentIndexToRemove = -1;
 

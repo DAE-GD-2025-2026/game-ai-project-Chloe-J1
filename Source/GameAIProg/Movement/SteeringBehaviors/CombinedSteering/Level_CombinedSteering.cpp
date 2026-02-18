@@ -15,10 +15,23 @@ void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	pSeek   = std::make_unique<Seek>();
+	pWander = std::make_unique<Wander>();
+	
+	TwoBehaviors.emplace_back(pSeek.get(),   0.5f);
+	TwoBehaviors.emplace_back(pWander.get(), 0.5f);
+	
 	
 	// Agents
-	AddAgent(BehaviorTypes::Wander);
+	AddAgent(BehaviorTypes::Blended);
 	SteeringAgents[0].Agent->SetDebugRenderingEnabled(true);
+	
+
+	
+	
+	
+	
+	 
 }
 
 void ALevel_CombinedSteering::BeginDestroy()
@@ -38,10 +51,12 @@ bool ALevel_CombinedSteering::AddAgent(BehaviorTypes BehaviorType, bool AutoOrie
 		
 		SetAgentBehavior(ImGuiAgent);
 
+		
 		SteeringAgents.push_back(std::move(ImGuiAgent));
 		
+		
 		RefreshTargetLabels();
-
+		
 		return true;
 	}
 
@@ -84,6 +99,10 @@ void ALevel_CombinedSteering::SetAgentBehavior(ImGui_Agent& Agent)
 		break;
 	case BehaviorTypes::Wander:
 		Agent.Behavior = std::make_unique<Wander>();
+		break;
+	case BehaviorTypes::Blended:
+		Agent.Behavior = std::make_unique<BlendedSteering>(TwoBehaviors);
+		pBlendedSteering = static_cast<BlendedSteering*>(Agent.Behavior.get());  
 		break;
 	default:
 		assert(false); // Incorrect Agent Behavior gotten during SetAgentBehavior()	
@@ -148,6 +167,8 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 	
+	
+	
 #pragma region UI
 	//UI
 	{
@@ -204,29 +225,31 @@ void ALevel_CombinedSteering::Tick(float DeltaTime)
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
 		
-		// if (pBlendedSteering != nullptr)
-		// {
-		// 	ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
-		// 	pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
-		// 	[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
-		//
-		// 	ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
-		// 	pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
-		// 	[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
-		// }
-		
-		// Update agents
-		for (ImGui_Agent& a : SteeringAgents)
+		if (pBlendedSteering != nullptr)
 		{
-			if (a.Agent)
-			{
-				UpdateTarget(a);
-			}
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
+			pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
+		
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
+			pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
 		}
+		
+		
 		//End
 		ImGui::End();
 	}
 #pragma endregion
+	
+	// Update agents
+	for (ImGui_Agent& a : SteeringAgents)
+	{
+		if (a.Agent)
+		{
+			UpdateTarget(a);
+		}
+	}
 	
 	// Combined Steering Update
  // TODO: implement handling mouse click input for seek
