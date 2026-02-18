@@ -14,12 +14,7 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	if (Target.Position != FVector2D{0,0})
 		Steering.LinearVelocity = Target.Position - Agent.GetPosition();
 
-	// Draw Debug lines
-	constexpr float Radius{20.f};
 	
-	FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
-	FVector2D PredictedPos = Agent.GetPosition() + Forward * Agent.GetVelocity().Size();
-	DrawDebugCircle(Agent.GetWorld(), FVector(PredictedPos.X, PredictedPos.Y, 0.f), Radius, 20, FColor::Purple, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 
 	return Steering;
 }
@@ -118,18 +113,28 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 {
 	SteeringOutput Steering{};
 	float Time{};
-	const float Distance = Steering.LinearVelocity.Length();
-	float Speed = Steering.LinearVelocity.Size();
+	const float Distance = (Agent.GetPosition() - Target.Position).Length();
+	float Speed = Target.LinearVelocity.Length();
+	
 	if (Speed != 0)
 		Time = Distance / Speed;
 	
+	FVector2D Predicted = Target.Position + Target.LinearVelocity * Time;
+	FVector2D OriginalPos = Target.Position;
+	Target.Position = Predicted;
+	
 	Steering = Seek::CalculateSteering(Time, Agent);
+	
+	// Reset target to the original target
+	Target.Position = OriginalPos;
 	
 	// Helper debug lines
 	constexpr float LineSize{100.f};
 	FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
 	FVector2D End = Agent.GetPosition() + Forward * LineSize;
 	DrawDebugDirectionalArrow(Agent.GetWorld(), FVector(Agent.GetPosition(),0), FVector(End.X, End.Y,0), 3.f, FColor::Green );
+	
+	DrawDebugCircle(Agent.GetWorld(), FVector(Predicted.X, Predicted.Y, 0.f), 10.f, 20, FColor::Purple, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	
 	return Steering;
 }
