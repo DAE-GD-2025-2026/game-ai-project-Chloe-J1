@@ -62,13 +62,21 @@ float* BlendedSteering::GetWeight(ISteeringBehavior* const SteeringBehavior)
 SteeringOutput PrioritySteering::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering = {};
-
+	
+	
+	
 	for (ISteeringBehavior* const pBehavior : m_PriorityBehaviors)
 	{
-		Steering = pBehavior->CalculateSteering(DeltaT, Agent);
+		
+		pBehavior->SetTarget(Target);
 
+		
+		Steering = pBehavior->CalculateSteering(DeltaT, Agent);
+		
 		if (Steering.IsValid)
+		{
 			break;
+		}
 	}
 
 	//If non of the behavior return a valid output, last behavior is returned

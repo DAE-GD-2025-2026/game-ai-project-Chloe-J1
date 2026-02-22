@@ -148,10 +148,24 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{Pursuit::CalculateSteering(DeltaT, Agent)};
 	
+	const float EvadeRadius{80.f};
+	constexpr float Offset{30.f};
+	FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
+	FVector2D Center = Agent.GetPosition() + Forward * EvadeRadius + Offset;
+	float DistanceToEvade = (Target.Position - Center).Length();
+	
 	// Evade is opposite of Pursuit, so inverse the values
 	Steering.LinearVelocity *= -1;
 	Steering.AngularVelocity *= -1;
 	
+	if (DistanceToEvade < EvadeRadius)
+	{
+		Steering.IsValid = true;
+		return Steering;
+	}
+	
+	
+	Steering.IsValid = false;
 	return Steering;
 }
 
@@ -181,5 +195,6 @@ SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	DrawDebugCircle(Agent.GetWorld(), FVector(RandPoint.X, RandPoint.Y, 0.f), 10.f, 20, FColor::Purple, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	
 	
+
 	return Steering;
 }

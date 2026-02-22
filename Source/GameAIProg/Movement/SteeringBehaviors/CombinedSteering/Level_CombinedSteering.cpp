@@ -15,21 +15,25 @@ void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Combined steering agent behaviors
 	pSeek   = std::make_unique<Seek>();
 	pWander = std::make_unique<Wander>();
 	
-	TwoBehaviors.emplace_back(pSeek.get(),   0.5f);
-	TwoBehaviors.emplace_back(pWander.get(), 0.5f);
+	CombinedBehaviors.emplace_back(pSeek.get(),   0.5f);
+	CombinedBehaviors.emplace_back(pWander.get(), 0.5f);
 	
+	// Priority steering agent behaviors
+	Evade* pEvade = new Evade();
+	Wander* pWander1 = new Wander();
+	
+	PriorityBehaviors.emplace_back(pEvade); // higher in priority list
+	PriorityBehaviors.emplace_back(pWander1);
 	
 	// Agents
 	AddAgent(BehaviorTypes::Blended);
 	SteeringAgents[0].Agent->SetDebugRenderingEnabled(true);
 	
-
-	
-	
-	
+	AddAgent(BehaviorTypes::Priority);
 	
 	 
 }
@@ -101,8 +105,12 @@ void ALevel_CombinedSteering::SetAgentBehavior(ImGui_Agent& Agent)
 		Agent.Behavior = std::make_unique<Wander>();
 		break;
 	case BehaviorTypes::Blended:
-		Agent.Behavior = std::make_unique<BlendedSteering>(TwoBehaviors);
+		Agent.Behavior = std::make_unique<BlendedSteering>(CombinedBehaviors);
+		Agent.Behavior->SetTarget(MouseTarget);
 		pBlendedSteering = static_cast<BlendedSteering*>(Agent.Behavior.get());  
+		break;
+	case BehaviorTypes::Priority:
+		Agent.Behavior = std::make_unique<PrioritySteering>(PriorityBehaviors);
 		break;
 	default:
 		assert(false); // Incorrect Agent Behavior gotten during SetAgentBehavior()	

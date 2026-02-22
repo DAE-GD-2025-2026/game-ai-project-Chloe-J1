@@ -42,6 +42,7 @@ private:
 		Pursuit,
 		Face,
 		Blended,
+		Priority,
 		// @ End
 		Count
 	};
@@ -59,7 +60,8 @@ private:
 	BlendedSteering* pBlendedSteering{};
 	std::unique_ptr<Seek> pSeek{};
 	std::unique_ptr<Wander> pWander{};
-	std::vector<BlendedSteering::WeightedBehavior> TwoBehaviors;
+	std::vector<BlendedSteering::WeightedBehavior> CombinedBehaviors;
+	std::vector<ISteeringBehavior*> PriorityBehaviors;
 	
 	int AgentIndexToRemove = -1;
 
