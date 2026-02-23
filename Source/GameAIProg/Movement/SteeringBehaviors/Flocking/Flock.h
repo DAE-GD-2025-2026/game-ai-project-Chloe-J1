@@ -48,14 +48,16 @@ private:
 	// For debug rendering purposes
 	UWorld* pWorld{nullptr};
 	
-	int FlockSize{0};
-	TArray<ASteeringAgent*> Agents{};
+
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 	//std::unique_ptr<CellSpace> pPartitionedSpace{};
 	//int NrOfCellsX{ 10 };
 	//TArray<FVector2D> OldPositions{};
 #else // No space partitioning
+	TArray<ASteeringAgent*> Agents{};
 	TArray<ASteeringAgent*> Neighbors{};
+	
+	int FlockSize;
 #endif // USE_SPACE_PARTITIONING
 	
 	float NeighborhoodRadius{200.f};
@@ -73,6 +75,8 @@ private:
 	
 	std::unique_ptr<BlendedSteering> pBlendedSteering{};
 	std::unique_ptr<PrioritySteering> pPrioritySteering{};
+	
+	BlendedSteering* pBlended{}; // TEST -> in dtor?
 
 	// UI and rendering
 	bool DebugRenderSteering{false};
@@ -80,4 +84,6 @@ private:
 	bool DebugRenderPartitions{true};
 
 	void RenderNeighborhood();
+	
+	
 };

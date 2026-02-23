@@ -3,6 +3,9 @@
 #include "MeshPaintVisualize.h"
 #include "GameAIProg/Movement/SteeringBehaviors/SteeringAgent.h"
 
+
+
+
 //SEEK
 //*******
 // TODO: Do the Week01 assignment :^)
@@ -143,7 +146,8 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	
 	return Steering;
 }
-
+//EVADE
+//*******
 SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{Pursuit::CalculateSteering(DeltaT, Agent)};
@@ -168,7 +172,8 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	Steering.IsValid = false;
 	return Steering;
 }
-
+//WANDER
+//*******
 SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{};
@@ -198,3 +203,4 @@ SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 
 	return Steering;
 }
+

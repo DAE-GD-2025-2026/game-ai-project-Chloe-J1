@@ -62,6 +62,7 @@ protected:
 	// Called when the object is being destroyed
 	virtual void BeginDestroy() override;
 
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

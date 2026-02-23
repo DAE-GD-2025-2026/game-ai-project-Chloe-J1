@@ -15,7 +15,7 @@ void ALevel_CombinedSteering::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Combined steering agent behaviors
+	// Combined steering agent weighted behaviors
 	pSeek   = std::make_unique<Seek>();
 	pWander = std::make_unique<Wander>();
 	

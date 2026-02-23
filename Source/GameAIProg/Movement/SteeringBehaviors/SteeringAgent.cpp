@@ -23,6 +23,8 @@ void ASteeringAgent::BeginDestroy()
 	Super::BeginDestroy();
 }
 
+
+
 // Called every frame
 void ASteeringAgent::Tick(float DeltaTime)
 {
