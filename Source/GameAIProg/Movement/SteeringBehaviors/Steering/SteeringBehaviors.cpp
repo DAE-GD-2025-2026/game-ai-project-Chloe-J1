@@ -15,6 +15,7 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	
 	SteeringOutput Steering{};
 	
+	
 	if (Target.Position != FVector2D{0,0})
 		Steering.LinearVelocity = Target.Position - Agent.GetPosition();
 

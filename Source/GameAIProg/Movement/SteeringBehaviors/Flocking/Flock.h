@@ -76,7 +76,8 @@ private:
 	std::unique_ptr<BlendedSteering> pBlendedSteering{};
 	std::unique_ptr<PrioritySteering> pPrioritySteering{};
 	
-	BlendedSteering* pBlended{}; // TEST -> in dtor?
+	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors{};
+	std::vector<Seek*> pSeekBehaviors{}; // maak getter GetSeek zodat deze vector weg kan
 
 	// UI and rendering
 	bool DebugRenderSteering{false};

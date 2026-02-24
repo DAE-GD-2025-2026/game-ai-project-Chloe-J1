@@ -20,7 +20,7 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& 
 	{
 		TotalWeight += Behavior.Weight;
 		
-		Behavior.pBehavior->SetTarget(Target);
+		// Behavior.pBehavior->SetTarget(Target);
 	}
 	
 	

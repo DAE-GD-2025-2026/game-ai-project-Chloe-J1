@@ -19,6 +19,7 @@ Flock::Flock(
  // TODO: initialize the flock and the memory pool
 	Agents.SetNum(FlockSize);
 	Neighbors.SetNum(FlockSize);
+	pSeekBehaviors.reserve(FlockSize);
 	NrOfNeighbors = 0;
 
 
@@ -40,18 +41,42 @@ Flock::Flock(
 				AgentClass,
 				SpawnPos,
 				FRotator::ZeroRotator);
-		pBlended = new BlendedSteering();
-		Agent->SetSteeringBehavior(pBlended);
+		
+		// pCohesion = new Cohesion(this);
+		// pSeparation = new Separation(this);
+		// pAlignment = new Alignment(this);
+		// pWander = new Wander();
+		// pSeek = new Seek();
+		
+		Seek* pSeek = new Seek();
+		Cohesion* pCohesion = new Cohesion(this);
+		Separation* pSeparation = new Separation(this);
+		Alignment* pAlignment = new Alignment(this);
+		Wander* pWander = new Wander();
+		
+		pSeekBehaviors.emplace_back(pSeek);
+		
+		
+		WeightedBehaviors.emplace_back(pCohesion, 0.3f);
+		WeightedBehaviors.emplace_back(pSeparation, 0.2f);
+		WeightedBehaviors.emplace_back(pAlignment, 0.1f);
+		WeightedBehaviors.emplace_back(pWander, 0.2f);
+		WeightedBehaviors.emplace_back(pSeek, 0.2f);
+		
+		BlendedSteering* ptest = new BlendedSteering(WeightedBehaviors);
+		Agent->SetSteeringBehavior(ptest);
+		
 	
 		Agents[index] = Agent;
+		
+		
 	 }
 }
 
 Flock::~Flock()
 {
  // TODO: Cleanup any additional data
-	if (pBlended)
-		delete pBlended;
+	
 }
 
 void Flock::Tick(float DeltaTime)
@@ -137,7 +162,7 @@ void Flock::RenderNeighborhood()
 #ifndef GAMEAI_USE_SPACE_PARTITIONING
 void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 {
-	NrOfNeighbors = 0; // wrong?
+	NrOfNeighbors = 0;
 	
 	if (pAgent == nullptr)
 		return;
@@ -198,6 +223,7 @@ FVector2D Flock::GetAverageNeighborVelocity() const
 
 void Flock::SetTarget_Seek(FSteeringParams const& Target)
 {
- // TODO: Implement
+	for (const auto& Seek : pSeekBehaviors)
+		Seek->SetTarget(Target);
 }
 
