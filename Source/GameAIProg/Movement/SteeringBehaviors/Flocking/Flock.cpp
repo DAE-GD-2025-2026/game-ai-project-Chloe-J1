@@ -25,6 +25,8 @@ Flock::Flock(
 
 	for (int index = 0; index < FlockSize; ++index)
 	{
+		WeightedBehaviors.clear();
+		pPriorityBehaviors.clear();
 		// Random spawn location
 		FVector SpawnPos{
 			// FMath::RandRange(0.f, WorldSize),
@@ -63,8 +65,13 @@ Flock::Flock(
 		WeightedBehaviors.emplace_back(pWander, 0.2f);
 		WeightedBehaviors.emplace_back(pSeek, 0.2f);
 		
-		BlendedSteering* ptest = new BlendedSteering(WeightedBehaviors);
-		Agent->SetSteeringBehavior(ptest);
+		BlendedSteering* pBlended = new BlendedSteering(WeightedBehaviors);
+		
+		Evade* pEvade = new Evade();
+		pPriorityBehaviors.emplace_back(pEvade); // -> higher in priority list
+		pPriorityBehaviors.emplace_back(pBlended);
+		pPrioritySteering = new PrioritySteering(pPriorityBehaviors);
+		Agent->SetSteeringBehavior(pPrioritySteering);
 		
 	
 		Agents[index] = Agent;

@@ -74,7 +74,9 @@ private:
 	//std::unique_ptr<Evade> pEvadeBehavior{};
 	
 	std::unique_ptr<BlendedSteering> pBlendedSteering{};
-	std::unique_ptr<PrioritySteering> pPrioritySteering{};
+	// std::unique_ptr<PrioritySteering> pPrioritySteering{};
+	PrioritySteering* pPrioritySteering{};
+	std::vector<ISteeringBehavior*> pPriorityBehaviors{};
 	
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors{};
 	std::vector<Seek*> pSeekBehaviors{}; // maak getter GetSeek zodat deze vector weg kan
