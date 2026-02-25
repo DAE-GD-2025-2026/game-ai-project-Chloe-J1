@@ -20,6 +20,12 @@ void ALevel_Flocking::BeginPlay()
 
 	TrimWorld->SetTrimWorldSize(3000.f);
 	TrimWorld->bShouldTrimWorld = true;
+	
+	pAgentToEvade =
+			GetWorld()->SpawnActor<ASteeringAgent>(
+				SteeringAgentClass,
+				FVector{200,200,90.f},
+				FRotator::ZeroRotator);
 
 	pFlock = TUniquePtr<Flock>(
 		new Flock(
@@ -170,5 +176,6 @@ void ALevel_Flocking::Tick(float DeltaTime)
 	{
 		pFlock->SetTarget_Seek(MouseTarget);
 	}
+	pFlock->SetTarget_Evade();
 }
 

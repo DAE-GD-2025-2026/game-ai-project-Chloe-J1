@@ -1,5 +1,6 @@
 #include "Flock.h"
 #include "FlockingSteeringBehaviors.h"
+#include "Movement/SteeringBehaviors/SpacePartitioning/SpacePartitioning.h"
 #include "Shared/ImGuiHelpers.h"
 
 // Disable tick voor agents bij spawning
@@ -21,78 +22,80 @@ Flock::Flock(
 	Neighbors.SetNum(FlockSize);
 	pSeekBehaviors.reserve(FlockSize);
 	NrOfNeighbors = 0;
-
-
+	
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+	pPartitionedSpace = new CellSpace(pWorld, WorldSize, WorldSize, 2,2, 10);
+#endif
+	
+	//Behaviors
+	pSeekBehavior = std::make_unique<Seek>();
+	pCohesionBehavior = std::make_unique<Cohesion>(this);
+	pSeparationBehavior = std::make_unique<Separation>(this);
+	pAlignmentBehavior = std::make_unique<Alignment>(this);
+	pWanderBehavior = std::make_unique<Wander>();
+	pEvadeBehavior = std::make_unique<Evade>();
+	
+	WeightedBehaviors.emplace_back(pCohesionBehavior.get(), 0.3f);
+	WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0.2f);
+	WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0.1f);
+	WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0.1f);
+	WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.3f);
+	
+	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
+	
+	pPriorityBehaviors.emplace_back(pEvadeBehavior.get()); // -> higher in priority list
+	pPriorityBehaviors.emplace_back(pBlendedSteering.get());
+	pPrioritySteering = std::make_unique<PrioritySteering>(std::vector<ISteeringBehavior*>(
+		std::vector<ISteeringBehavior*>{pEvadeBehavior.get(),pBlendedSteering.get()}
+		));
+	
+	//EvadeTarget agent
+	Wander* pWand = new Wander();
+	pAgentToEvade->SetSteeringBehavior(pWand);
+		 
+	
+	//Flock agents
 	for (int index = 0; index < FlockSize; ++index)
 	{
 		WeightedBehaviors.clear();
 		pPriorityBehaviors.clear();
 		// Random spawn location
 		FVector SpawnPos{
-			// FMath::RandRange(0.f, WorldSize),
-			// FMath::RandRange(0.f, WorldSize),
+			// FMath::RandRange(-WorldSize, WorldSize),
+			// FMath::RandRange(-WorldSize, WorldSize),
 			// 90.f
 			index * 100.f,
 			index * 100.f,
 			90.f
 		};
-	
-	
+
 		ASteeringAgent* Agent =
 			pWorld->SpawnActor<ASteeringAgent>(
 				AgentClass,
 				SpawnPos,
 				FRotator::ZeroRotator);
+
+		Agent->SetSteeringBehavior(pPrioritySteering.get());
+		Agent->SetDebugRenderingEnabled(false);
 		
-		// pCohesion = new Cohesion(this);
-		// pSeparation = new Separation(this);
-		// pAlignment = new Alignment(this);
-		// pWander = new Wander();
-		// pSeek = new Seek();
-		
-		Seek* pSeek = new Seek();
-		Cohesion* pCohesion = new Cohesion(this);
-		Separation* pSeparation = new Separation(this);
-		Alignment* pAlignment = new Alignment(this);
-		Wander* pWander = new Wander();
-		
-		pSeekBehaviors.emplace_back(pSeek);
-		
-		
-		WeightedBehaviors.emplace_back(pCohesion, 0.3f);
-		WeightedBehaviors.emplace_back(pSeparation, 0.2f);
-		WeightedBehaviors.emplace_back(pAlignment, 0.1f);
-		WeightedBehaviors.emplace_back(pWander, 0.2f);
-		WeightedBehaviors.emplace_back(pSeek, 0.2f);
-		
-		BlendedSteering* pBlended = new BlendedSteering(WeightedBehaviors);
-		
-		Evade* pEvade = new Evade();
-		pPriorityBehaviors.emplace_back(pEvade); // -> higher in priority list
-		pPriorityBehaviors.emplace_back(pBlended);
-		pPrioritySteering = new PrioritySteering(pPriorityBehaviors);
-		Agent->SetSteeringBehavior(pPrioritySteering);
-		
-	
 		Agents[index] = Agent;
-		
-		
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+		pPartitionedSpace->AddAgent(*Agent);
+#endif
 	 }
 }
 
 Flock::~Flock()
 {
  // TODO: Cleanup any additional data
-	
 }
 
 void Flock::Tick(float DeltaTime)
 {
  // TODO: update the flock
  // TODO: for every agent:
-  
-  
-  
+#ifndef GAMEAI_USE_SPACE_PARTITIONING
+	// NO PARTITIONING
 	for (ASteeringAgent* pAgent : Agents)
 	{
 		// TODO: register the neighbors for this agent (-> fill the memory pool with the neighbors for the currently evaluated agent)
@@ -103,6 +106,13 @@ void Flock::Tick(float DeltaTime)
 		
 		// TODO: trim the agent to the world
 	}
+#endif
+	
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+	// PARTITIONING
+	pPartitionedSpace->UpdateAgentCell()
+#endif
+	SetTarget_Evade();
 }
 
 void Flock::RenderDebug()
@@ -188,7 +198,26 @@ void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 	}
 		
 }
+
 #endif
+
+int Flock::GetNrOfNeighbors() const
+{
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+	pCellSpace->GetNrOfNeighbors();
+#endif
+	
+	return NrOfNeighbors;
+}
+
+const TArray<ASteeringAgent*>& Flock::GetNeighbors() const
+{
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+	return pCellSpace->GetNeighbors();
+#endif
+	
+	return Neighbors;
+}
 
 FVector2D Flock::GetAverageNeighborPos() const
 {
@@ -230,7 +259,22 @@ FVector2D Flock::GetAverageNeighborVelocity() const
 
 void Flock::SetTarget_Seek(FSteeringParams const& Target)
 {
-	for (const auto& Seek : pSeekBehaviors)
-		Seek->SetTarget(Target);
+	pSeekBehavior->SetTarget(Target);
+}
+
+void Flock::SetTarget_Evade()
+{
+	if (pAgentToEvade == nullptr) return;
+	
+	FTargetData TargetData;
+	TargetData.AngularVelocity = pAgentToEvade->GetAngularVelocity();
+	TargetData.LinearVelocity = pAgentToEvade->GetLinearVelocity();
+	TargetData.Position = pAgentToEvade->GetPosition();
+	TargetData.Orientation = pAgentToEvade->GetRotation();
+	
+	pEvadeBehavior->SetTarget(TargetData);
+	
+	DrawDebugCircle(pWorld, FVector(TargetData.Position.X, TargetData.Position.Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	
 }
 

@@ -12,7 +12,7 @@
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 #include "../SpacePartitioning/SpacePartitioning.h"
 #endif
-
+class CellSpace;
 class Flock final
 {
 public:
@@ -35,14 +35,15 @@ public:
 	//int GetNrOfNeighbors() const { return pPartitionedSpace->GetNrOfNeighbors(); }
 #else // No space partitioning
 	void RegisterNeighbors(ASteeringAgent* const Agent);
-	int GetNrOfNeighbors() const { return NrOfNeighbors; }
-	const TArray<ASteeringAgent*>& GetNeighbors() const { return Neighbors; }
+	int GetNrOfNeighbors() const;
+	const TArray<ASteeringAgent*>& GetNeighbors() const;
 #endif // USE_SPACE_PARTITIONING
 
 	FVector2D GetAverageNeighborPos() const;
 	FVector2D GetAverageNeighborVelocity() const;
 
 	void SetTarget_Seek(FSteeringParams const & Target);
+	void SetTarget_Evade();
 
 private:
 	// For debug rendering purposes
@@ -50,9 +51,9 @@ private:
 	
 
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
-	//std::unique_ptr<CellSpace> pPartitionedSpace{};
-	//int NrOfCellsX{ 10 };
-	//TArray<FVector2D> OldPositions{};
+	std::unique_ptr<CellSpace> pPartitionedSpace{};
+	int NrOfCellsX{ 10 };
+	TArray<FVector2D> OldPositions{};
 #else // No space partitioning
 	TArray<ASteeringAgent*> Agents{};
 	TArray<ASteeringAgent*> Neighbors{};
@@ -63,23 +64,23 @@ private:
 	float NeighborhoodRadius{200.f};
 	int NrOfNeighbors{0};
 
-	ASteeringAgent* pAgentToEvade{nullptr};
+	ASteeringAgent* pAgentToEvade;
+	
 	
 	//Steering Behaviors
-	//std::unique_ptr<Separation> pSeparationBehavior{};
-	//std::unique_ptr<Cohesion> pCohesionBehavior{};
-	//std::unique_ptr<VelocityMatch> pVelMatchBehavior{};
-	//std::unique_ptr<Seek> pSeekBehavior{};
-	//std::unique_ptr<Wander> pWanderBehavior{};
-	//std::unique_ptr<Evade> pEvadeBehavior{};
-	
 	std::unique_ptr<BlendedSteering> pBlendedSteering{};
-	// std::unique_ptr<PrioritySteering> pPrioritySteering{};
-	PrioritySteering* pPrioritySteering{};
 	std::vector<ISteeringBehavior*> pPriorityBehaviors{};
+	std::unique_ptr<PrioritySteering> pPrioritySteering{};
+	std::unique_ptr<Separation> pSeparationBehavior{};
+	std::unique_ptr<Cohesion> pCohesionBehavior{};
+	std::unique_ptr<Alignment> pAlignmentBehavior{};
+	std::unique_ptr<Seek> pSeekBehavior{};
+	std::unique_ptr<Wander> pWanderBehavior{};
+	std::unique_ptr<Evade> pEvadeBehavior{};
 	
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors{};
 	std::vector<Seek*> pSeekBehaviors{}; // maak getter GetSeek zodat deze vector weg kan
+	std::vector<Evade*> pEvadeBehaviors; // maak getter GetEvade zodat deze vector weg kan
 
 	// UI and rendering
 	bool DebugRenderSteering{false};
@@ -87,6 +88,4 @@ private:
 	bool DebugRenderPartitions{true};
 
 	void RenderNeighborhood();
-	
-	
 };
