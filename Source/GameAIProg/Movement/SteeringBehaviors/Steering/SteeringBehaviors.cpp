@@ -212,7 +212,8 @@ SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 
 	return Steering;
 }
-
+//TEST
+//*******
 SteeringOutput Test::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{};

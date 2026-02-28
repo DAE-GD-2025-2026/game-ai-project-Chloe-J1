@@ -87,5 +87,7 @@ private:
 	bool DebugRenderPartitions{true};
 
 	void RenderNeighborhood();
+	bool IsFirstNeighborhoodInitialized{false};
+	TArray<ASteeringAgent*> FirstNeighborhood;
 	ASteeringAgent* SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float WorldSize);
 };

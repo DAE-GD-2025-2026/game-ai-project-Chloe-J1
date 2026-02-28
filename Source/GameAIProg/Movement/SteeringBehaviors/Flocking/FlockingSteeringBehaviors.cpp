@@ -16,19 +16,18 @@ SteeringOutput Cohesion::CalculateSteering(float deltaT, ASteeringAgent& pAgent)
 		return Steering;
 	}
 	
-	FVector2D avgPos = pFlock->GetAverageNeighborPos();
+	FVector2D AvgPos = pFlock->GetAverageNeighborPos();
 	
-	FVector2D Destination = avgPos - pAgent.GetPosition();
 	
-	FVector2D OldTarget = Target.Position;
-	Target.Position = Destination;
-
+	
+	
+	Target.Position = AvgPos;
 	Steering = Seek::CalculateSteering(deltaT, pAgent);
 	Steering.IsValid = true;
-	
-	Target.Position = OldTarget;
+
 	
 	return Steering;
+	
 }
 
 //*********************

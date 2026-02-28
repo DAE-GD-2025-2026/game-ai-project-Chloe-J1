@@ -18,8 +18,7 @@ Flock::Flock(
 	, pAgentToEvade{pAgentToEvade}
 {
  // TODO: initialize the flock and the memory pool
-	Agents.SetNum(FlockSize);
-	Neighbors.SetNum(FlockSize);
+	Agents.SetNumZeroed(FlockSize);
 	NrOfNeighbors = 0;
 	
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
@@ -40,8 +39,7 @@ Flock::Flock(
 	// WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0.2f);
 	// WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0.1f);
 	// WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0.1f);
-	// WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.5f);
-	//
+	// WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.3f);
 
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
@@ -59,16 +57,15 @@ Flock::Flock(
 		 
 	
 	//Flock agents
+	int SpawnedCount = 0;
 	for (int index = 0; index < FlockSize; ++index)
 	{
-		
-		ASteeringAgent* Agent = SpawnAgent(AgentClass, WorldSize);
-		if (Agent)
+		if (ASteeringAgent* Agent = SpawnAgent(AgentClass, WorldSize))
 		{
 			Agent->SetSteeringBehavior(pPrioritySteering.get());
 			Agent->SetDebugRenderingEnabled(false);
-		
-			Agents[index] = Agent;
+			Agents[SpawnedCount] = Agent;
+			SpawnedCount++;
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 			pPartitionedSpace->AddAgent(*Agent);
 #endif
@@ -77,8 +74,7 @@ Flock::Flock(
 		{
 			FlockSize--;
 		}
-		
-	 }
+	}
 }
 
 Flock::~Flock()
@@ -96,12 +92,13 @@ void Flock::Tick(float DeltaTime)
 	{
 		// TODO: register the neighbors for this agent (-> fill the memory pool with the neighbors for the currently evaluated agent)
 		RegisterNeighbors(pAgent);
-		
+		RenderNeighborhood();
 		// TODO: update the agent (-> the steeringbehaviors use the neighbors in the memory pool)
 		pAgent->Tick(DeltaTime);
 		
 		// TODO: trim the agent to the world
 	}
+	
 #endif
 	
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
@@ -170,6 +167,18 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 void Flock::RenderNeighborhood()
 {
  // TODO: Debugrender the neighbors for the first agent in the flock
+	if (Agents.Num() == 0) return;
+    if (IsFirstNeighborhoodInitialized == false)
+    {
+	    FirstNeighborhood = Neighbors;
+    	IsFirstNeighborhoodInitialized = true;
+    }
+	for (ASteeringAgent* NeighborAgent : FirstNeighborhood)
+	{
+		DrawDebugCircle(pWorld, FVector(NeighborAgent->GetPosition().X, NeighborAgent->GetPosition().Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	}
+	DrawDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	
 }
 
 ASteeringAgent* Flock::SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float WorldSize)
@@ -201,24 +210,26 @@ ASteeringAgent* Flock::SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float 
 #ifndef GAMEAI_USE_SPACE_PARTITIONING
 void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 {
+	Neighbors.Empty();
 	NrOfNeighbors = 0;
 	
 	if (pAgent == nullptr)
 		return;
 	for (ASteeringAgent* NeighborAgent : Agents)
 	{
-		if (NeighborAgent == pAgent) continue;
+		if (NeighborAgent == pAgent || NeighborAgent == nullptr) continue;
 		
 		float DistanceToNeighbor = (pAgent->GetPosition() - NeighborAgent->GetPosition()).Length();
 		if (DistanceToNeighbor <= NeighborhoodRadius)
 		{
 			// Add to this Agent's neighbors
-			Neighbors[NrOfNeighbors] = NeighborAgent;
+			Neighbors.Add(NeighborAgent);
 			++NrOfNeighbors;
 			
 		}
 	}
-		
+	
+
 }
 
 #endif
@@ -246,7 +257,7 @@ FVector2D Flock::GetAverageNeighborPos() const
 	FVector2D avgPosition = FVector2D::ZeroVector;
 	if (NrOfNeighbors == 0) return avgPosition;
 	int ValidCount = 0;
-
+	
 	for (ASteeringAgent* NeighborAgent : Neighbors)
 	{
 		if (NeighborAgent != nullptr)
@@ -256,8 +267,8 @@ FVector2D Flock::GetAverageNeighborPos() const
 		}
 			
 	}
-	
-	return avgPosition / ValidCount;
+
+	return (avgPosition / ValidCount);
 }
 
 FVector2D Flock::GetAverageNeighborVelocity() const
@@ -295,8 +306,6 @@ void Flock::SetTarget_Evade()
 	TargetData.Orientation = pAgentToEvade->GetRotation();
 	
 	// pEvadeBehavior->SetTarget(TargetData);
-	//
-	// DrawDebugCircle(pWorld, FVector(TargetData.Position.X, TargetData.Position.Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	
 	
 	pTestBehavior->SetTarget(TargetData);
