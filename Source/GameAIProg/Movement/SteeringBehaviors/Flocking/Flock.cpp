@@ -62,6 +62,7 @@ Flock::Flock(
 	{
 		if (ASteeringAgent* Agent = SpawnAgent(AgentClass, WorldSize))
 		{
+			Agent->SetActorTickEnabled(false);
 			Agent->SetSteeringBehavior(pPrioritySteering.get());
 			Agent->SetDebugRenderingEnabled(false);
 			Agents[SpawnedCount] = Agent;
