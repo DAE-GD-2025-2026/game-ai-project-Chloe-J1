@@ -68,7 +68,7 @@ SteeringOutput PrioritySteering::CalculateSteering(float DeltaT, ASteeringAgent&
 	for (ISteeringBehavior* const pBehavior : m_PriorityBehaviors)
 	{
 		
-		pBehavior->SetTarget(Target);
+		// pBehavior->SetTarget(Target);
 
 		
 		Steering = pBehavior->CalculateSteering(DeltaT, Agent);

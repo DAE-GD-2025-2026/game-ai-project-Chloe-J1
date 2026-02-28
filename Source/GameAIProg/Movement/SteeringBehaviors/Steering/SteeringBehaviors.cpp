@@ -213,3 +213,49 @@ SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	return Steering;
 }
 
+SteeringOutput Test::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
+{
+	SteeringOutput Steering{};
+	
+	float Time{};
+	const float Distance = (Agent.GetPosition() - Target.Position).Length();
+	float Speed = Target.LinearVelocity.Length();
+	
+	if (Speed != 0)
+		Time = Distance / Speed;
+	
+	FVector2D Predicted = Target.Position + Target.LinearVelocity * Time;
+	Target.Position = Predicted;
+	
+	Steering = Seek::CalculateSteering(Time, Agent);
+	
+	
+	constexpr float EvadeRadius{80.f};
+	constexpr float Offset{30.f};
+	FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
+	FVector2D Center = Agent.GetPosition() + Forward * EvadeRadius + Offset;
+	float DistanceToEvade = (Target.Position - Center).Length();
+	
+	
+	// Evade is opposite of Pursuit, so inverse the values
+	Steering.LinearVelocity *= -1;
+	Steering.AngularVelocity *= -1;
+	
+	if (DistanceToEvade < EvadeRadius)
+	{
+		Steering.IsValid = true;
+		if (GEngine)
+		{
+			GEngine->AddOnScreenDebugMessage(
+				-1, 0.f, FColor::Red,
+				FString::Printf(TEXT("Evade"))
+					);
+		}
+		return Steering;
+	}
+	
+	
+	Steering.IsValid = false;
+	return Steering;
+}
+

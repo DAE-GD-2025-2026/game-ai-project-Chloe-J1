@@ -69,7 +69,6 @@ private:
 	
 	//Steering Behaviors
 	std::unique_ptr<BlendedSteering> pBlendedSteering{};
-	std::vector<ISteeringBehavior*> pPriorityBehaviors{};
 	std::unique_ptr<PrioritySteering> pPrioritySteering{};
 	std::unique_ptr<Separation> pSeparationBehavior{};
 	std::unique_ptr<Cohesion> pCohesionBehavior{};
@@ -78,9 +77,9 @@ private:
 	std::unique_ptr<Wander> pWanderBehavior{};
 	std::unique_ptr<Evade> pEvadeBehavior{};
 	
+	std::unique_ptr<Test> pTestBehavior{};
+	
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors{};
-	std::vector<Seek*> pSeekBehaviors{}; // maak getter GetSeek zodat deze vector weg kan
-	std::vector<Evade*> pEvadeBehaviors; // maak getter GetEvade zodat deze vector weg kan
 
 	// UI and rendering
 	bool DebugRenderSteering{false};

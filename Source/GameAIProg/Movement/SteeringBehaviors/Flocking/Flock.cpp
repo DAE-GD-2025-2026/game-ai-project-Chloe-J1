@@ -20,7 +20,6 @@ Flock::Flock(
  // TODO: initialize the flock and the memory pool
 	Agents.SetNum(FlockSize);
 	Neighbors.SetNum(FlockSize);
-	pSeekBehaviors.reserve(FlockSize);
 	NrOfNeighbors = 0;
 	
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
@@ -35,18 +34,23 @@ Flock::Flock(
 	pWanderBehavior = std::make_unique<Wander>();
 	pEvadeBehavior = std::make_unique<Evade>();
 	
+	pTestBehavior = std::make_unique<Test>();
+	
 	WeightedBehaviors.emplace_back(pCohesionBehavior.get(), 0.3f);
 	WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0.2f);
 	WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0.1f);
 	WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0.1f);
-	WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.3f);
+	WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.5f);
+	
+
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
 	
-	pPriorityBehaviors.emplace_back(pEvadeBehavior.get()); // -> higher in priority list
-	pPriorityBehaviors.emplace_back(pBlendedSteering.get());
-	pPrioritySteering = std::make_unique<PrioritySteering>(std::vector<ISteeringBehavior*>(
-		std::vector<ISteeringBehavior*>{pEvadeBehavior.get(),pBlendedSteering.get()}
+
+	pPrioritySteering = std::make_unique<PrioritySteering>(
+		std::vector<ISteeringBehavior*>(std::vector<ISteeringBehavior*>{
+			pTestBehavior.get(), // -> higher in priority list
+			pBlendedSteering.get()}
 		));
 	
 	//EvadeTarget agent
@@ -57,8 +61,7 @@ Flock::Flock(
 	//Flock agents
 	for (int index = 0; index < FlockSize; ++index)
 	{
-		WeightedBehaviors.clear();
-		pPriorityBehaviors.clear();
+
 		// Random spawn location
 		FVector SpawnPos{
 			// FMath::RandRange(-WorldSize, WorldSize),
@@ -272,9 +275,11 @@ void Flock::SetTarget_Evade()
 	TargetData.Position = pAgentToEvade->GetPosition();
 	TargetData.Orientation = pAgentToEvade->GetRotation();
 	
-	pEvadeBehavior->SetTarget(TargetData);
+	// pEvadeBehavior->SetTarget(TargetData);
+	//
+	// DrawDebugCircle(pWorld, FVector(TargetData.Position.X, TargetData.Position.Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	
-	DrawDebugCircle(pWorld, FVector(TargetData.Position.X, TargetData.Position.Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	
+	pTestBehavior->SetTarget(TargetData);
 }
 
