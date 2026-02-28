@@ -37,11 +37,11 @@ Flock::Flock(
 	pTestBehavior = std::make_unique<Test>();
 	
 	WeightedBehaviors.emplace_back(pCohesionBehavior.get(), 0.3f);
-	WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0.2f);
-	WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0.1f);
-	WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0.1f);
-	WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.5f);
-	
+	// WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0.2f);
+	// WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0.1f);
+	// WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0.1f);
+	// WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.5f);
+	//
 
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
@@ -61,30 +61,23 @@ Flock::Flock(
 	//Flock agents
 	for (int index = 0; index < FlockSize; ++index)
 	{
-
-		// Random spawn location
-		FVector SpawnPos{
-			// FMath::RandRange(-WorldSize, WorldSize),
-			// FMath::RandRange(-WorldSize, WorldSize),
-			// 90.f
-			index * 100.f,
-			index * 100.f,
-			90.f
-		};
-
-		ASteeringAgent* Agent =
-			pWorld->SpawnActor<ASteeringAgent>(
-				AgentClass,
-				SpawnPos,
-				FRotator::ZeroRotator);
-
-		Agent->SetSteeringBehavior(pPrioritySteering.get());
-		Agent->SetDebugRenderingEnabled(false);
 		
-		Agents[index] = Agent;
+		ASteeringAgent* Agent = SpawnAgent(AgentClass, WorldSize);
+		if (Agent)
+		{
+			Agent->SetSteeringBehavior(pPrioritySteering.get());
+			Agent->SetDebugRenderingEnabled(false);
+		
+			Agents[index] = Agent;
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
-		pPartitionedSpace->AddAgent(*Agent);
+			pPartitionedSpace->AddAgent(*Agent);
 #endif
+		}
+		else
+		{
+			FlockSize--;
+		}
+		
 	 }
 }
 
@@ -177,6 +170,32 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 void Flock::RenderNeighborhood()
 {
  // TODO: Debugrender the neighbors for the first agent in the flock
+}
+
+ASteeringAgent* Flock::SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float WorldSize)
+{
+	constexpr int MaxTries = 50;
+    
+	for (int Try = 0; Try < MaxTries; ++Try)
+	{
+		FVector SpawnPos{
+			FMath::RandRange(-WorldSize, WorldSize),
+			FMath::RandRange(-WorldSize, WorldSize),
+			90.f
+		};
+        
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+		
+		ASteeringAgent* Agent = pWorld->SpawnActor<ASteeringAgent>(
+			AgentClass, SpawnPos, FRotator::ZeroRotator, SpawnParams);
+        
+		if (Agent != nullptr)
+		{
+			return Agent;
+		}
+	}
+	return nullptr;
 }
 
 #ifndef GAMEAI_USE_SPACE_PARTITIONING

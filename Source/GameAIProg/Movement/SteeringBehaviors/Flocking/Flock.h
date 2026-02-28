@@ -87,4 +87,5 @@ private:
 	bool DebugRenderPartitions{true};
 
 	void RenderNeighborhood();
+	ASteeringAgent* SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float WorldSize);
 };
