@@ -27,27 +27,28 @@ Flock::Flock(
 	
 	//Behaviors
 	pSeekBehavior = std::make_unique<Seek>();
+	pWanderBehavior = std::make_unique<Wander>();
 	pCohesionBehavior = std::make_unique<Cohesion>(this);
 	pSeparationBehavior = std::make_unique<Separation>(this);
 	pAlignmentBehavior = std::make_unique<Alignment>(this);
-	pWanderBehavior = std::make_unique<Wander>();
 	pEvadeBehavior = std::make_unique<Evade>();
 	
 	pTestBehavior = std::make_unique<Test>();
 	
 	WeightedBehaviors.emplace_back(pCohesionBehavior.get(), 0.3f);
-	// WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0.2f);
-	// WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0.1f);
-	// WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0.1f);
-	// WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.3f);
-
+	WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0.2f);
+	WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0.1f);
+	WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0.1f);
+	WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.3f);
+	pTestPursuit = std::make_unique<Pursuit>();
+	// WeightedBehaviors.emplace_back(pTestPursuit.get(), 1);
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
 	
 
 	pPrioritySteering = std::make_unique<PrioritySteering>(
 		std::vector<ISteeringBehavior*>(std::vector<ISteeringBehavior*>{
-			pTestBehavior.get(), // -> higher in priority list
+			pEvadeBehavior.get(), // -> higher in priority list
 			pBlendedSteering.get()}
 		));
 	
@@ -156,8 +157,35 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
+		
+		
 
   // TODO: implement ImGUI sliders for steering behavior weights here
+		ImGui::Text("Behavior Sliders");
+		ImGui::Spacing();
+		if (pBlendedSteering != nullptr)
+		{
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
+			pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
+		
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
+			pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
+			
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Cohesion",
+			pBlendedSteering->GetWeightedBehaviorsRef()[2].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[2].Weight = InVal; }, "%.2f");
+			
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Separation",
+			pBlendedSteering->GetWeightedBehaviorsRef()[3].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[3].Weight = InVal; }, "%.2f");
+			
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Alignment",
+			pBlendedSteering->GetWeightedBehaviorsRef()[4].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[4].Weight = InVal; }, "%.2f");
+			
+		}
 		//End
 		ImGui::End();
 	}
@@ -306,9 +334,9 @@ void Flock::SetTarget_Evade()
 	TargetData.Position = pAgentToEvade->GetPosition();
 	TargetData.Orientation = pAgentToEvade->GetRotation();
 	
-	// pEvadeBehavior->SetTarget(TargetData);
+	pEvadeBehavior->SetTarget(TargetData);
 	
-	
+	pTestPursuit->SetTarget(TargetData);
 	pTestBehavior->SetTarget(TargetData);
 }
 

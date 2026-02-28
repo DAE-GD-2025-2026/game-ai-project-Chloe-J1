@@ -15,8 +15,8 @@ SteeringOutput Seek::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	
 	SteeringOutput Steering{};
 	
-	
-	Steering.LinearVelocity = Target.Position - Agent.GetPosition();
+	if (Target.Position != FVector2D(0,0))
+		Steering.LinearVelocity = Target.Position - Agent.GetPosition();
 
 	// Helper debug lines
 	constexpr float LineSize{100.f};
@@ -98,8 +98,7 @@ SteeringOutput Face::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	
 	double DeltaAngle = TargetAngle - ForwardAngle;
 	
-	// if(GEngine)
-	// 	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("dest: %f"), DeltaAngle));	
+	
 	
 	if (abs(DeltaAngle) >= Threshold)
 	{
@@ -122,19 +121,15 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	SteeringOutput Steering{};
 	float Time{};
 	const float Distance = (Agent.GetPosition() - Target.Position).Length();
-	float Speed = Target.LinearVelocity.Length();
+	float Speed = Agent.GetVelocity().Length();
 	
 	if (Speed != 0)
 		Time = Distance / Speed;
-	
-	FVector2D Predicted = Target.Position + Target.LinearVelocity * Time;
-	FVector2D OriginalPos = Target.Position;
+	FVector2D Predicted = Target.Position +  (60.f * Time); // Met wat moet je time vermenigvuldigen, Target.Velocity?
 	Target.Position = Predicted;
 	
-	Steering = Seek::CalculateSteering(Time, Agent);
-	
-	// Reset target to the original target
-	Target.Position = OriginalPos;
+	Steering = Seek::CalculateSteering(DeltaT, Agent);
+
 	
 	// Helper debug lines
 	constexpr float LineSize{100.f};
@@ -142,7 +137,7 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	FVector2D End = Agent.GetPosition() + Forward * LineSize;
 	DrawDebugDirectionalArrow(Agent.GetWorld(), FVector(Agent.GetPosition(),0), FVector(End.X, End.Y,0), 3.f, FColor::Green );
 	
-	DrawDebugCircle(Agent.GetWorld(), FVector(Predicted.X, Predicted.Y, 0.f), 10.f, 20, FColor::Purple, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 0.f), 10.f, 20, FColor::Orange, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	
 	return Steering;
 }
@@ -152,13 +147,14 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 {
 	SteeringOutput Steering{Pursuit::CalculateSteering(DeltaT, Agent)};
 	
+	
 	constexpr float EvadeRadius{80.f};
 	constexpr float Offset{30.f};
 	FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
 	FVector2D Center = Agent.GetPosition() + Forward * EvadeRadius + Offset;
 	float DistanceToEvade = (Target.Position - Center).Length();
 	
-	DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 0.f), EvadeRadius, 20, FColor::Red, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	 DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 0.f), EvadeRadius, 20, FColor::Red, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	
 	// Evade is opposite of Pursuit, so inverse the values
 	Steering.LinearVelocity *= -1;
@@ -167,13 +163,7 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	if (DistanceToEvade < EvadeRadius)
 	{
 		Steering.IsValid = true;
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1, 0.f, FColor::Red,
-				FString::Printf(TEXT("Evade"))
-					);
-		}
+		
 		return Steering;
 	}
 	
@@ -258,5 +248,6 @@ SteeringOutput Test::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	
 	Steering.IsValid = false;
 	return Steering;
+	
 }
 

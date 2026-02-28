@@ -78,6 +78,7 @@ private:
 	std::unique_ptr<Evade> pEvadeBehavior{};
 	
 	std::unique_ptr<Test> pTestBehavior{};
+	std::unique_ptr<Pursuit> pTestPursuit{};
 	
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors{};
 
