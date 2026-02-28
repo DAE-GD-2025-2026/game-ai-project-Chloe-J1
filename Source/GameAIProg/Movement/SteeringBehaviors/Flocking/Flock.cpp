@@ -165,27 +165,29 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		ImGui::Spacing();
 		if (pBlendedSteering != nullptr)
 		{
-			ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
-			pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
-			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
-		
-			ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
-			pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
-			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
+			
 			
 			ImGuiHelpers::ImGuiSliderFloatWithSetter("Cohesion",
+	pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight, 0.f, 1.f,
+	[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[0].Weight = InVal; }, "%.2f");
+    
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Separation",
+			pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight, 0.f, 1.f,
+			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[1].Weight = InVal; }, "%.2f");
+    
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Alignment",
 			pBlendedSteering->GetWeightedBehaviorsRef()[2].Weight, 0.f, 1.f,
 			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[2].Weight = InVal; }, "%.2f");
-			
-			ImGuiHelpers::ImGuiSliderFloatWithSetter("Separation",
+
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
 			pBlendedSteering->GetWeightedBehaviorsRef()[3].Weight, 0.f, 1.f,
 			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[3].Weight = InVal; }, "%.2f");
-			
-			ImGuiHelpers::ImGuiSliderFloatWithSetter("Alignment",
+    
+			ImGuiHelpers::ImGuiSliderFloatWithSetter("Seek",
 			pBlendedSteering->GetWeightedBehaviorsRef()[4].Weight, 0.f, 1.f,
 			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[4].Weight = InVal; }, "%.2f");
-			
 		}
+		
 		//End
 		ImGui::End();
 	}

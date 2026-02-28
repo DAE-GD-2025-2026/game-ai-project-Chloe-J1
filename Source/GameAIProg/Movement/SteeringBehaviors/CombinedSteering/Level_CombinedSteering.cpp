@@ -170,11 +170,17 @@ void ALevel_CombinedSteering::RefreshAgentTargets(unsigned int IndexRemoved)
 	}
 }
 
+void ALevel_CombinedSteering::SetTarget_Seek()
+{
+	
+	pSeek->SetTarget(MouseTarget);
+}
+
 // Called every frame
 void ALevel_CombinedSteering::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+	SetTarget_Seek();
 	
 	
 #pragma region UI
