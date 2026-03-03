@@ -20,9 +20,12 @@ Flock::Flock(
 	FlockSize = flockSize;
 	Agents.SetNumZeroed(FlockSize);
 	NrOfNeighbors = 0;
-	OldPositions.SetNumZeroed(flockSize);
+#ifndef GAMEAI_USE_SPACE_PARTITIONING
+	Neighbors.SetNumZeroed(FlockSize);
+#endif
 	
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
+	OldPositions.SetNumZeroed(flockSize);
 	pPartitionedSpace = std::make_unique<CellSpace>(pWorld, WorldSize*2, WorldSize*2, 2,2, FlockSize);
 #endif
 	
@@ -79,7 +82,7 @@ Flock::Flock(
 			FlockSize--;
 		}
 	}
-
+	
 }
 
 Flock::~Flock()
@@ -103,6 +106,8 @@ void Flock::Tick(float DeltaTime)
 		
 		// TODO: trim the agent to the world
 	}
+	
+
 	
 #endif
 	

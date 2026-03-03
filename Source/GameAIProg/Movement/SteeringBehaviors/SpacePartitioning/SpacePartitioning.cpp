@@ -55,6 +55,7 @@ CellSpace::CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Co
 			Cells.push_back(Cell(Left, Bottom, CellWidth, CellHeight));
 		}
 	}
+	RenderCells();
 }
 
 void CellSpace::AddAgent(ASteeringAgent& Agent)
@@ -85,6 +86,7 @@ void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 {
 	// TODO Register the neighbors for the provided agent
 	// TODO Only check the cells that are within the radius of the neighborhood
+	Neighbors.Reset();
 	NrOfNeighbors = 0;
 
 	FRect QueryRect;
@@ -99,9 +101,8 @@ void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 		{
 			if (pAgent != &Agent && pAgent != nullptr)
 			{
-				Neighbors[NrOfNeighbors++] = pAgent;
-				if(GEngine)
-					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Nr Neighbors: %d"), Neighbors.Num()));
+				Neighbors.Add(pAgent);
+				++NrOfNeighbors;
 			}
 		}
 	}
@@ -116,6 +117,15 @@ void CellSpace::EmptyCells()
 void CellSpace::RenderCells() const
 {
 	// TODO Render the cells with the number of agents inside of it
+	for (const Cell& cell : Cells)
+	{
+		FVector Center{cell.BoundingBox.Min, 0};
+		Center.X += CellWidth / 2.f;
+		Center.Y += CellHeight / 2.f;
+		
+		DrawDebugBox(pWorld, Center, FVector{CellWidth /2.f, CellHeight/2.f,0}, FColor::Yellow, true);
+	}
+	
 }
 
 int CellSpace::PositionToIndex(FVector2D const & Pos) const
