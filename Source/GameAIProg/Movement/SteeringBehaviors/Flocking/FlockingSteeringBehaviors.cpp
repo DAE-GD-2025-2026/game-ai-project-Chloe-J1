@@ -20,7 +20,6 @@ SteeringOutput Cohesion::CalculateSteering(float deltaT, ASteeringAgent& pAgent)
 	
 	
 	
-	
 	Target.Position = AvgPos;
 	Steering = Seek::CalculateSteering(deltaT, pAgent);
 	Steering.IsValid = true;

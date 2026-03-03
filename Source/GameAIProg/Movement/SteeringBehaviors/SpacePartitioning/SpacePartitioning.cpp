@@ -36,7 +36,7 @@ CellSpace::CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Co
 	, NrOfCols{Cols}
 	, NrOfNeighbors{0}
 {
-	Neighbors.SetNum(MaxEntities);
+	Neighbors.SetNumZeroed(MaxEntities);
 	
 	//calculate bounds of a cell
 	CellWidth = Width / Cols;
@@ -62,6 +62,7 @@ void CellSpace::AddAgent(ASteeringAgent& Agent)
 	if (&Agent == nullptr) return;  
 	// TODO Add the agent to the correct cell
 	int Index{PositionToIndex(Agent.GetPosition())};
+	Agent.SetActorTickEnabled(false);
 	Cells[Index].Agents.emplace_back(&Agent);
 }
 
@@ -100,7 +101,7 @@ void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 			{
 				Neighbors[NrOfNeighbors++] = pAgent;
 				if(GEngine)
-					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Nr Neighbors: %d"), NrOfNeighbors));
+					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Nr Neighbors: %d"), Neighbors.Num()));
 			}
 		}
 	}
