@@ -100,7 +100,8 @@ void Flock::Tick(float DeltaTime)
 	{
 		// TODO: register the neighbors for this agent (-> fill the memory pool with the neighbors for the currently evaluated agent)
 		RegisterNeighbors(pAgent);
-		RenderNeighborhood();
+		
+		
 		// TODO: update the agent (-> the steeringbehaviors use the neighbors in the memory pool)
 		pAgent->Tick(DeltaTime);
 		
@@ -113,27 +114,26 @@ void Flock::Tick(float DeltaTime)
 	
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 	// PARTITIONING
-	// Update cells
-	for (int i = 0; i < Agents.Num(); ++i)
+	// Update cells & agents
+	for (int index = 0; index < Agents.Num(); ++index)
 	{
-		ASteeringAgent* pAgent = Agents[i];
+		ASteeringAgent* pAgent = Agents[index];
 		if (!pAgent) continue;
-    
-		FVector2D OldPos = OldPositions[i];
-		FVector2D NewPos = pAgent->GetPosition();
-    
-		pPartitionedSpace->UpdateAgentCell(*pAgent, OldPos);
-		OldPositions[i] = NewPos;
-	}
-	// Neighbors register
-	for (ASteeringAgent* pAgent : Agents)
-	{
-		if (!pAgent) continue;
-    
+
+		pPartitionedSpace->UpdateAgentCell(*pAgent, OldPositions[index]);
+		
 		pPartitionedSpace->RegisterNeighbors(*pAgent, NeighborhoodRadius);
-		RenderNeighborhood();
+		if (not IsFirstNeighborhoodInitialized)
+		{
+			RenderNeighborhood();
+			IsFirstNeighborhoodInitialized = true;
+		}
+		
+		
 		pAgent->Tick(DeltaTime);
+		OldPositions[index] = pAgent->GetPosition();
 	}
+	IsFirstNeighborhoodInitialized = false;
 #endif
 	SetTarget_Evade();
 }
@@ -232,17 +232,17 @@ void Flock::RenderNeighborhood()
 {
  // TODO: Debugrender the neighbors for the first agent in the flock
 	if (Agents.Num() == 0) return;
-    if (IsFirstNeighborhoodInitialized == false)
-    {
-	    FirstNeighborhood = GetNeighbors();
-    	IsFirstNeighborhoodInitialized = true;
-    }
-	for (ASteeringAgent* NeighborAgent : FirstNeighborhood)
+
+	// Agent of who the neighborhood is
+	DrawDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 0.f), NeighborhoodRadius, 20, FColor::Green, false, -1, 0, 3.f,FVector(0,1,0), FVector(1,0,0));
+
+	// Neighbors
+	TArray<ASteeringAgent*> CurrentNeighbors = GetNeighbors();
+	for (int i = 0; i < GetNrOfNeighbors(); ++i)
 	{
-		if (NeighborAgent == nullptr) continue;
-		DrawDebugCircle(pWorld, FVector(NeighborAgent->GetPosition().X, NeighborAgent->GetPosition().Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+		if (CurrentNeighbors[i] == nullptr) continue;
+		DrawDebugCircle(pWorld, FVector(CurrentNeighbors[i]->GetPosition().X, CurrentNeighbors[i]->GetPosition().Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	}
-	DrawDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 0.f), 80.f, 20, FColor::Yellow, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 }
 
 ASteeringAgent* Flock::SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float WorldSize)
@@ -291,8 +291,13 @@ void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 			++NrOfNeighbors;
 			
 		}
+		
+		
 	}
-	
+	if (pAgent == Agents[0])
+	{
+		RenderNeighborhood();
+	}
 
 }
 

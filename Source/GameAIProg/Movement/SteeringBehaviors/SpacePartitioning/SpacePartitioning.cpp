@@ -86,7 +86,6 @@ void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 {
 	// TODO Register the neighbors for the provided agent
 	// TODO Only check the cells that are within the radius of the neighborhood
-	Neighbors.Reset();
 	NrOfNeighbors = 0;
 
 	FRect QueryRect;
@@ -101,7 +100,7 @@ void CellSpace::RegisterNeighbors(ASteeringAgent& Agent, float QueryRadius)
 		{
 			if (pAgent != &Agent && pAgent != nullptr)
 			{
-				Neighbors.Add(pAgent);
+				Neighbors[NrOfNeighbors] = pAgent;
 				++NrOfNeighbors;
 			}
 		}
