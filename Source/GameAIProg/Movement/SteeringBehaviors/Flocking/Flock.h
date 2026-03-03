@@ -1,7 +1,7 @@
 ﻿#pragma once
 
 // Toggle this define to enable/disable spatial partitioning
-// #define GAMEAI_USE_SPACE_PARTITIONING
+#define GAMEAI_USE_SPACE_PARTITIONING
 
 #include "FlockingSteeringBehaviors.h"
 #include "Movement/SteeringBehaviors/SteeringAgent.h"
@@ -19,7 +19,7 @@ public:
 	Flock(
 	UWorld* pWorld,
 	TSubclassOf<ASteeringAgent> AgentClass,
-	int FlockSize = 10, 
+	int flockSize = 10, 
 	float WorldSize = 100.f, 
 	ASteeringAgent* const pAgentToEvade = nullptr, 
 	bool bTrimWorld = false);
@@ -31,14 +31,14 @@ public:
 	void ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize);
 
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
-	//const TArray<ASteeringAgent*>& GetNeighbors() const { return pPartitionedSpace->GetNeighbors(); }
-	//int GetNrOfNeighbors() const { return pPartitionedSpace->GetNrOfNeighbors(); }
+	const TArray<ASteeringAgent*>& GetNeighbors() const { return pPartitionedSpace->GetNeighbors(); }
+	int GetNrOfNeighbors() const { return pPartitionedSpace->GetNrOfNeighbors(); }
 #else // No space partitioning
 	void RegisterNeighbors(ASteeringAgent* const Agent);
-	int GetNrOfNeighbors() const;
-	const TArray<ASteeringAgent*>& GetNeighbors() const;
+	int GetNrOfNeighbors() const {return NrOfNeighbors; }
+	const TArray<ASteeringAgent*>& GetNeighbors() const {return Neighbors;}
 #endif // USE_SPACE_PARTITIONING
-
+	
 	FVector2D GetAverageNeighborPos() const;
 	FVector2D GetAverageNeighborVelocity() const;
 
@@ -54,12 +54,13 @@ private:
 	std::unique_ptr<CellSpace> pPartitionedSpace{};
 	int NrOfCellsX{ 10 };
 	TArray<FVector2D> OldPositions{};
+	
 #else // No space partitioning
-	TArray<ASteeringAgent*> Agents{};
 	TArray<ASteeringAgent*> Neighbors{};
 	
-	int FlockSize;
 #endif // USE_SPACE_PARTITIONING
+	int FlockSize;
+	TArray<ASteeringAgent*> Agents{};
 	
 	float NeighborhoodRadius{200.f};
 	int NrOfNeighbors{0};
@@ -76,10 +77,7 @@ private:
 	std::unique_ptr<Seek> pSeekBehavior{};
 	std::unique_ptr<Wander> pWanderBehavior{};
 	std::unique_ptr<Evade> pEvadeBehavior{};
-	
-	std::unique_ptr<Test> pTestBehavior{};
-	std::unique_ptr<Pursuit> pTestPursuit{};
-	
+
 	std::vector<BlendedSteering::WeightedBehavior> WeightedBehaviors{};
 
 	// UI and rendering
@@ -91,4 +89,6 @@ private:
 	bool IsFirstNeighborhoodInitialized{false};
 	TArray<ASteeringAgent*> FirstNeighborhood;
 	ASteeringAgent* SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float WorldSize);
+	
+	bool IsSpacePartitioning{false};
 };

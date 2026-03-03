@@ -137,7 +137,7 @@ SteeringOutput Pursuit::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	FVector2D End = Agent.GetPosition() + Forward * LineSize;
 	DrawDebugDirectionalArrow(Agent.GetWorld(), FVector(Agent.GetPosition(),0), FVector(End.X, End.Y,0), 3.f, FColor::Green );
 	
-	DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 0.f), 10.f, 20, FColor::Orange, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	// DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 0.f), 10.f, 20, FColor::Orange, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	
 	return Steering;
 }
@@ -154,8 +154,8 @@ SteeringOutput Evade::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	FVector2D Center = Agent.GetPosition() + Forward * EvadeRadius + Offset;
 	float DistanceToEvade = (Target.Position - Center).Length();
 	
-	 DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 0.f), EvadeRadius, 20, FColor::Red, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
-	
+	 // DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position.X, Target.Position.Y, 0.f), EvadeRadius, 20, FColor::Red, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	 //
 	// Evade is opposite of Pursuit, so inverse the values
 	Steering.LinearVelocity *= -1;
 	Steering.AngularVelocity *= -1;

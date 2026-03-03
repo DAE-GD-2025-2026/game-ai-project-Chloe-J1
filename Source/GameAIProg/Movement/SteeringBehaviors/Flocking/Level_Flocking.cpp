@@ -98,14 +98,6 @@ void ALevel_Flocking::SetAgentBehavior(ImGui_Agent& Agent)
 	case BehaviorTypes::Wander:
 		Agent.Behavior = std::make_unique<Wander>();
 		break;
-	// case BehaviorTypes::Blended:
-	// 	Agent.Behavior = std::make_unique<BlendedSteering>(CombinedBehaviors);
-	// 	Agent.Behavior->SetTarget(MouseTarget);
-	// 	pBlendedSteering = static_cast<BlendedSteering*>(Agent.Behavior.get());  
-	// 	break;
-	// case BehaviorTypes::Priority:
-	// 	Agent.Behavior = std::make_unique<PrioritySteering>(PriorityBehaviors);
-	// 	break;
 	default:
 		assert(false); // Incorrect Agent Behavior gotten during SetAgentBehavior()	
 	} 
