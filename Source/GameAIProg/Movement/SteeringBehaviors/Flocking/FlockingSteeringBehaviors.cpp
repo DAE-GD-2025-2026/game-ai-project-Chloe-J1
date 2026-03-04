@@ -39,21 +39,21 @@ SteeringOutput Separation::CalculateSteering(float deltaT, ASteeringAgent& pAgen
 		Steering.IsValid = false;
 		return Steering;
 	}
-	FVector2D Destination{};
-	for (const auto& Neighbor : pFlock->GetNeighbors())
+
+	FVector2D OutputVelocity{};
+	TArray<ASteeringAgent*> pNeighborAgents = pFlock->GetNeighbors();
+
+	for (int index = 0; index < pFlock->GetNrOfNeighbors(); ++index)
 	{
-		if (Neighbor == nullptr) continue;
-		FVector2D VecToNeighbor = FVector2D(Neighbor->GetPosition() - pAgent.GetPosition());
-		float DistanceToNeighbor = VecToNeighbor.Length();
-		Destination += VecToNeighbor.GetSafeNormal() * (1.f / DistanceToNeighbor);
+		if (pNeighborAgents[index] == nullptr) continue;
+
+		FVector2D ToAgent = FVector2D(pAgent.GetPosition() - pNeighborAgents[index]->GetPosition());
+		FVector2D PushForce = ToAgent / PushForce.SquaredLength();
+		OutputVelocity += PushForce;
 	}
-	FVector2D OldTarget = Target.Position;
-	Target.Position = Destination;
-	Steering = Seek::CalculateSteering(deltaT, pAgent);
-	Steering.LinearVelocity *= -1; // Move AWAY
-	
-	
-	Target.Position = OldTarget;
+
+	Steering.LinearVelocity = OutputVelocity;
+	Steering.IsValid = true;
 	return Steering;
 }
 

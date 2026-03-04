@@ -40,10 +40,10 @@ Flock::Flock(
 
 	
 	WeightedBehaviors.emplace_back(pCohesionBehavior.get(), 0.3f);
-	// WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0);
-	WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0);
-	// WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0);
-	// WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0);
+	WeightedBehaviors.emplace_back(pSeparationBehavior.get(), 0.2f);
+	WeightedBehaviors.emplace_back(pAlignmentBehavior.get(), 0.3f);
+	WeightedBehaviors.emplace_back(pWanderBehavior.get(), 0.1f);
+	WeightedBehaviors.emplace_back(pSeekBehavior.get(), 0.3f);
 	
 	pBlendedSteering = std::make_unique<BlendedSteering>(WeightedBehaviors);
 	
@@ -211,7 +211,7 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 			ImGuiHelpers::ImGuiSliderFloatWithSetter("Alignment",
 			pBlendedSteering->GetWeightedBehaviorsRef()[2].Weight, 0.f, 1.f,
 			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[2].Weight = InVal; }, "%.2f");
-
+	
 			ImGuiHelpers::ImGuiSliderFloatWithSetter("Wander",
 			pBlendedSteering->GetWeightedBehaviorsRef()[3].Weight, 0.f, 1.f,
 			[this](float InVal) { pBlendedSteering->GetWeightedBehaviorsRef()[3].Weight = InVal; }, "%.2f");
@@ -274,7 +274,6 @@ ASteeringAgent* Flock::SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float 
 #ifndef GAMEAI_USE_SPACE_PARTITIONING
 void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 {
-	Neighbors.Empty();
 	NrOfNeighbors = 0;
 	
 	if (pAgent == nullptr)
@@ -287,7 +286,7 @@ void Flock::RegisterNeighbors(ASteeringAgent* const pAgent)
 		if (DistanceToNeighbor <= NeighborhoodRadius)
 		{
 			// Add to this Agent's neighbors
-			Neighbors.Add(NeighborAgent);
+			Neighbors[NrOfNeighbors] = NeighborAgent;
 			++NrOfNeighbors;
 			
 		}
