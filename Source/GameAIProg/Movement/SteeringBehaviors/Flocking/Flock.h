@@ -90,6 +90,5 @@ private:
 	bool IsFirstNeighborhoodInitialized{false};
 	TArray<ASteeringAgent*> FirstNeighborhood;
 	ASteeringAgent* SpawnAgent(TSubclassOf<ASteeringAgent> AgentClass, float WorldSize);
-	
-	bool IsSpacePartitioning{false};
+	bool IsDebugRendering{true};
 };

@@ -1,5 +1,6 @@
 #include "Flock.h"
 #include "FlockingSteeringBehaviors.h"
+#include "MeshPaintVisualize.h"
 #include "Movement/SteeringBehaviors/SpacePartitioning/SpacePartitioning.h"
 #include "Shared/ImGuiHelpers.h"
 
@@ -191,10 +192,12 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
 		
-		if (ImGui::Checkbox("Spatial Partitioning", &IsSpacePartitioning))
+		if (ImGui::Checkbox("Debug Rendering", &IsDebugRendering))
+		for (const auto& Agent : Agents)
 		{
-			
+			Agent->SetDebugRenderingEnabled(IsDebugRendering);
 		}
+		
 		
 		
 
@@ -244,8 +247,10 @@ void Flock::RenderNeighborhood()
 	if (Agents.Num() == 0) return;
 
 	// Agent of who the neighborhood is
+	const float HalfBoxSize{40.f};
 	DrawDebugCircle(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 0.f), NeighborhoodRadius, 20, FColor::Green, false, -1, 0, 3.f,FVector(0,1,0), FVector(1,0,0));
-
+	DrawDebugBox(pWorld, FVector(Agents[0]->GetPosition().X, Agents[0]->GetPosition().Y, 0), FVector(HalfBoxSize,HalfBoxSize,0.f), FColor::Black); // bounding box
+	
 	// Neighbors
 	TArray<ASteeringAgent*> CurrentNeighbors = GetNeighbors();
 	for (int i = 0; i < GetNrOfNeighbors(); ++i)
