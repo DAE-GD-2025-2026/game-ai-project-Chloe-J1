@@ -57,6 +57,7 @@ Flock::Flock(
 	//EvadeTarget agent
 	Wander* pWand = new Wander();
 	pAgentToEvade->SetSteeringBehavior(pWand);
+	pAgentToEvade->SetDebugRenderingEnabled(false);
 		 
 
 	// NO PARTITIONING
@@ -136,6 +137,7 @@ void Flock::Tick(float DeltaTime)
 	IsFirstNeighborhoodInitialized = false;
 #endif
 	SetTarget_Evade();
+	DebugRenderEvadeAgent();
 }
 
 void Flock::RenderDebug()
@@ -226,6 +228,11 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 	}
 #pragma endregion
 #endif
+}
+
+void Flock::DebugRenderEvadeAgent()
+{
+	DrawDebugCircle(pWorld, FVector(pAgentToEvade->GetPosition(),0), 50.f, 20, FColor::Purple, false, -1, 0, 3.f,FVector(0,1,0), FVector(1,0,0));
 }
 
 void Flock::RenderNeighborhood()
@@ -350,4 +357,6 @@ void Flock::SetTarget_Evade()
 	pEvadeBehavior->SetTarget(TargetData);
 	
 }
+
+
 

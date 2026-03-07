@@ -57,7 +57,7 @@ class Pursuit : public Seek
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent & Agent) override;
 };
 
-class Evade : public Pursuit
+class Evade : public Flee
 {
 public:
 	virtual SteeringOutput CalculateSteering(float DeltaT, ASteeringAgent & Agent) override;

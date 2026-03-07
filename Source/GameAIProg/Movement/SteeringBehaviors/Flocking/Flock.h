@@ -84,6 +84,7 @@ private:
 	bool DebugRenderSteering{false};
 	bool DebugRenderNeighborhood{true};
 	bool DebugRenderPartitions{true};
+	void DebugRenderEvadeAgent();
 
 	void RenderNeighborhood();
 	bool IsFirstNeighborhoodInitialized{false};
