@@ -1,5 +1,7 @@
 #include "SpacePartitioning.h"
 
+#include "DynamicMesh/DynamicMesh3.h"
+
 // --- Cell ---
 // ------------
 Cell::Cell(float Left, float Bottom, float Width, float Height)
@@ -55,7 +57,6 @@ CellSpace::CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Co
 			Cells.push_back(Cell(Left, Bottom, CellWidth, CellHeight));
 		}
 	}
-	RenderCells();
 }
 
 void CellSpace::AddAgent(ASteeringAgent& Agent)
@@ -116,13 +117,17 @@ void CellSpace::EmptyCells()
 void CellSpace::RenderCells() const
 {
 	// TODO Render the cells with the number of agents inside of it
+	FlushDebugStrings(pWorld);
 	for (const Cell& cell : Cells)
 	{
 		FVector Center{cell.BoundingBox.Min, 0};
 		Center.X += CellWidth / 2.f;
 		Center.Y += CellHeight / 2.f;
 		
-		DrawDebugBox(pWorld, Center, FVector{CellWidth /2.f, CellHeight/2.f,0}, FColor::Yellow, true);
+		DrawDebugBox(pWorld, Center, FVector{CellWidth /2.f, CellHeight/2.f,0}, FColor::Red, false, -1);
+		
+		DrawDebugString(pWorld, Center, std::to_string(cell.Agents.size()).c_str());
+		
 	}
 	
 }

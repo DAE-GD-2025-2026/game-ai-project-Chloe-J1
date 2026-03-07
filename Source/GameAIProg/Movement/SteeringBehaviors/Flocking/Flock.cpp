@@ -26,7 +26,7 @@ Flock::Flock(
 	
 #ifdef GAMEAI_USE_SPACE_PARTITIONING
 	OldPositions.SetNumZeroed(flockSize);
-	pPartitionedSpace = std::make_unique<CellSpace>(pWorld, WorldSize*2, WorldSize*2, 2,2, FlockSize);
+	pPartitionedSpace = std::make_unique<CellSpace>(pWorld, WorldSize*2, WorldSize*2, NrOfCellsX,NrOfCellsX, FlockSize);
 #endif
 	
 	//Behaviors
@@ -135,9 +135,12 @@ void Flock::Tick(float DeltaTime)
 		OldPositions[index] = pAgent->GetPosition();
 	}
 	IsFirstNeighborhoodInitialized = false;
+	
+	pPartitionedSpace->RenderCells();
 #endif
 	SetTarget_Evade();
 	DebugRenderEvadeAgent();
+	
 }
 
 void Flock::RenderDebug()
