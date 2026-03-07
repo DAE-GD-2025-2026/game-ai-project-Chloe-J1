@@ -184,70 +184,25 @@ SteeringOutput Wander::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
 	FVector2D Center = Agent.GetPosition() + Forward * Radius + Offset;
 	float Angle = FMath::RandRange(MinAngle, MaxAngle);
 	
-	FVector2D oldTarget = Target.Position;
+	// FVector2D oldTarget = Target.Position;
 	FVector2D RandPoint = FVector2D(FMath::Cos(Angle) * Radius, FMath::Sin(Angle) * Radius) + Center;
 	Target.Position = RandPoint;
 	
 	Steering = Seek::CalculateSteering(DeltaT, Agent);
 	
-	// Reset to initial target
-	Target.Position = oldTarget;
+	// // Reset to initial target
+	// Target.Position = oldTarget;
 	
 	// Draw Debug lines
-
-	DrawDebugCircle(Agent.GetWorld(), FVector(Center.X, Center.Y, 0.f), Radius, 20, FColor::Purple, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
-	DrawDebugCircle(Agent.GetWorld(), FVector(RandPoint.X, RandPoint.Y, 0.f), 10.f, 20, FColor::Purple, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
-	
-	
-
-	return Steering;
-}
-//TEST
-//*******
-SteeringOutput Test::CalculateSteering(float DeltaT, ASteeringAgent& Agent)
-{
-	SteeringOutput Steering{};
-	
-	float Time{};
-	const float Distance = (Agent.GetPosition() - Target.Position).Length();
-	float Speed = Target.LinearVelocity.Length();
-	
-	if (Speed != 0)
-		Time = Distance / Speed;
-	
-	FVector2D Predicted = Target.Position + Target.LinearVelocity * Time;
-	Target.Position = Predicted;
-	
-	Steering = Seek::CalculateSteering(Time, Agent);
-	
-	
-	constexpr float EvadeRadius{80.f};
-	constexpr float Offset{30.f};
-	FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
-	FVector2D Center = Agent.GetPosition() + Forward * EvadeRadius + Offset;
-	float DistanceToEvade = (Target.Position - Center).Length();
-	
-	
-	// Evade is opposite of Pursuit, so inverse the values
-	Steering.LinearVelocity *= -1;
-	Steering.AngularVelocity *= -1;
-	
-	if (DistanceToEvade < EvadeRadius)
+	if (Agent.GetDebugRenderingEnabled())
 	{
-		Steering.IsValid = true;
-		if (GEngine)
-		{
-			GEngine->AddOnScreenDebugMessage(
-				-1, 0.f, FColor::Red,
-				FString::Printf(TEXT("Evade"))
-					);
-		}
-		return Steering;
+		DrawDebugCircle(Agent.GetWorld(), FVector(Center.X, Center.Y, 0.f), Radius, 20, FColor::Purple, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+		DrawDebugCircle(Agent.GetWorld(), FVector(RandPoint.X, RandPoint.Y, 0.f), 10.f, 20, FColor::Purple, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
 	}
+
 	
 	
-	Steering.IsValid = false;
+
 	return Steering;
-	
 }
 
