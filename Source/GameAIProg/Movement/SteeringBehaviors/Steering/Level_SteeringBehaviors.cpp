@@ -23,9 +23,9 @@ void ALevel_SteeringBehaviors::BeginPlay()
 	AddAgent(BehaviorTypes::Seek);
 	SteeringAgents[0].Agent->SetDebugRenderingEnabled(true);
 
-	AddAgent(BehaviorTypes::Seek);
-	SteeringAgents[1].Agent->SetDebugRenderingEnabled(true);
-	SteeringAgents[1].Agent->SetActorLocation(FVector{500,100,0});
+	// AddAgent(BehaviorTypes::Seek);
+	// SteeringAgents[1].Agent->SetDebugRenderingEnabled(true);
+	// SteeringAgents[1].Agent->SetActorLocation(FVector{500,100,0});
 }
 
 void ALevel_SteeringBehaviors::BeginDestroy()
