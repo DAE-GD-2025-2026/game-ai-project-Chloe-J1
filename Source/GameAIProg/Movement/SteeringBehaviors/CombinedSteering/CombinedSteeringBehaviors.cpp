@@ -31,12 +31,17 @@ SteeringOutput BlendedSteering::CalculateSteering(float DeltaT, ASteeringAgent& 
 		SteeringOutput Steering = SteeringBehavior->CalculateSteering(DeltaT, Agent);
 		BlendedSteering.LinearVelocity += Steering.LinearVelocity * (Behavior.Weight / TotalWeight);
 	}
-	// TODO: Add debug drawing
-	constexpr float LineSize{100.f};
-	FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
-	FVector2D End = Agent.GetPosition() + Forward * LineSize;
-	DrawDebugDirectionalArrow(Agent.GetWorld(), FVector(Agent.GetPosition(),0), FVector(End.X, End.Y,0), 3.f, FColor::Red );
+	
+	// Debug drawing
+	if (Agent.GetDebugRenderingEnabled())
+	{
+		constexpr float LineSize{100.f};
+		FVector2D Forward = FVector2D(Agent.GetActorForwardVector()).GetSafeNormal();
+		FVector2D End = Agent.GetPosition() + Forward * LineSize;
+		DrawDebugDirectionalArrow(Agent.GetWorld(), FVector(Agent.GetPosition(),0), FVector(End.X, End.Y,0), 3.f, FColor::Red );
 
+	}
+	
 	
 	return BlendedSteering;
 }
@@ -67,10 +72,6 @@ SteeringOutput PrioritySteering::CalculateSteering(float DeltaT, ASteeringAgent&
 	
 	for (ISteeringBehavior* const pBehavior : m_PriorityBehaviors)
 	{
-		
-		// pBehavior->SetTarget(Target);
-
-		
 		Steering = pBehavior->CalculateSteering(DeltaT, Agent);
 		
 		if (Steering.IsValid)

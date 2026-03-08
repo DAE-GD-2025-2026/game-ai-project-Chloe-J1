@@ -41,8 +41,11 @@ CellSpace::CellSpace(UWorld* pWorld, float Width, float Height, int Rows, int Co
 	Neighbors.SetNumZeroed(MaxEntities);
 	
 	//calculate bounds of a cell
-	CellWidth = Width / Cols;
-	CellHeight = Height / Rows;
+	if (Cols > 0)
+		CellWidth = Width / Cols;
+	if (Rows > 0)
+		CellHeight = Height / Rows;
+
 	
 	CellOrigin = { -Width / 2.f, -Height / 2.f };
 	

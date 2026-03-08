@@ -55,8 +55,6 @@ SteeringOutput Separation::CalculateSteering(float deltaT, ASteeringAgent& pAgen
 	
 
 	Steering.LinearVelocity = OutputVelocity;
-
-	
 	Steering.IsValid = true;
 	return Steering;
 }
