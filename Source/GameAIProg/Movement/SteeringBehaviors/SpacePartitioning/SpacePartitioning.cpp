@@ -118,6 +118,7 @@ void CellSpace::RenderCells() const
 {
 	// TODO Render the cells with the number of agents inside of it
 	FlushDebugStrings(pWorld);
+	if (!IsDebugRendering) return;
 	for (const Cell& cell : Cells)
 	{
 		FVector Center{cell.BoundingBox.Min, 0};
@@ -130,6 +131,11 @@ void CellSpace::RenderCells() const
 		
 	}
 	
+}
+
+void CellSpace::SetDebugRendering(bool isDebugRendering)
+{
+	IsDebugRendering = isDebugRendering;
 }
 
 int CellSpace::PositionToIndex(FVector2D const & Pos) const

@@ -44,7 +44,8 @@ public:
 	//empties the cells of entities
 	void EmptyCells();
 	void RenderCells()const;
-
+	
+	void SetDebugRendering(bool isDebugRendering);
 private:
 	// For debug draw purposes
 	UWorld* pWorld{};
@@ -69,4 +70,6 @@ private:
 	// Helper functions
 	int PositionToIndex(FVector2D const & Pos) const;
 	bool DoRectsOverlap(FRect const& RectA, FRect const& RectB);
+	
+	bool IsDebugRendering{true};
 };

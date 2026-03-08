@@ -192,11 +192,10 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 		ImGui::Text("Behavior Weights");
 		ImGui::Spacing();
 		
-		if (ImGui::Checkbox("Debug Rendering", &IsDebugRendering))
-		for (const auto& Agent : Agents)
-		{
-			Agent->SetDebugRenderingEnabled(IsDebugRendering);
-		}
+		ImGui::Checkbox("Debug Rendering", &IsDebugRendering);
+#ifdef GAMEAI_USE_SPACE_PARTITIONING
+		pPartitionedSpace->SetDebugRendering(IsDebugRendering);
+#endif
 		
 		
 		
@@ -238,13 +237,14 @@ void Flock::ImGuiRender(ImVec2 const& WindowPos, ImVec2 const& WindowSize)
 
 void Flock::DebugRenderEvadeAgent()
 {
-	DrawDebugCircle(pWorld, FVector(pAgentToEvade->GetPosition(),0), 50.f, 20, FColor::Purple, false, -1, 0, 3.f,FVector(0,1,0), FVector(1,0,0));
+	if (IsDebugRendering)
+		DrawDebugCircle(pWorld, FVector(pAgentToEvade->GetPosition(),0), 50.f, 20, FColor::Purple, false, -1, 0, 3.f,FVector(0,1,0), FVector(1,0,0));
 }
 
 void Flock::RenderNeighborhood()
 {
  // TODO: Debugrender the neighbors for the first agent in the flock
-	if (Agents.Num() == 0) return;
+	if (Agents.Num() == 0 || !IsDebugRendering) return;
 
 	// Agent of who the neighborhood is
 	const float HalfBoxSize{40.f};

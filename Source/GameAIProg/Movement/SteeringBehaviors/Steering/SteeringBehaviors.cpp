@@ -72,10 +72,14 @@ SteeringOutput Arrive::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	}
 	
 	// Draw helper lines
-	constexpr float TargetCircleRadius{10.f};
-	DrawDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition(),0), TargetRadius, 20, FColor::Red, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
-	DrawDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition(),0), SlowRadius, 20, FColor::Blue, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
-	DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position,0), TargetCircleRadius, 20, FColor::Red, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	if (Agent.GetDebugRenderingEnabled())
+	{
+		constexpr float TargetCircleRadius{10.f};
+		DrawDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition(),0), TargetRadius, 20, FColor::Red, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+		DrawDebugCircle(Agent.GetWorld(), FVector(Agent.GetPosition(),0), SlowRadius, 20, FColor::Blue, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+		DrawDebugCircle(Agent.GetWorld(), FVector(Target.Position,0), TargetCircleRadius, 20, FColor::Red, false, -1, 0, 3.f, FVector(0,1,0), FVector(1,0,0));
+	}
+	
 	
 	return Steering;
 }

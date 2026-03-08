@@ -36,26 +36,26 @@ SteeringOutput Separation::CalculateSteering(float deltaT, ASteeringAgent& pAgen
 	SteeringOutput Steering{};
 	if (pFlock->GetNrOfNeighbors() == 0)
 	{
-		// Steering.IsValid = false;
+		Steering.IsValid = false;
 		return Steering;
 	}
-
+	
 	FVector2D OutputVelocity{};
 	TArray<ASteeringAgent*> pNeighborAgents = pFlock->GetNeighbors();
-
+	
 	for (int index = 0; index < pFlock->GetNrOfNeighbors(); ++index)
 	{
 		if (pNeighborAgents[index] == nullptr) continue;
 		
 		FVector2D ToAgent = FVector2D(pAgent.GetPosition() - pNeighborAgents[index]->GetPosition());
-		FVector2D PushForce = ToAgent / PushForce.SquaredLength();
+		// Inverse proportional = normalized / distance
+		FVector2D PushForce = ToAgent / ToAgent.SquaredLength();
 		OutputVelocity += PushForce;
 	}
 	
-	if (OutputVelocity > FVector2D(0.0f, 0.0f))
-		Steering.LinearVelocity = OutputVelocity;
-	else
-		Steering.IsValid = false;
+
+	Steering.LinearVelocity = OutputVelocity;
+
 	
 	Steering.IsValid = true;
 	return Steering;
