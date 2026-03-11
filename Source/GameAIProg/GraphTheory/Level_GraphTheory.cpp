@@ -54,7 +54,10 @@ void ALevel_GraphTheory::BeginPlay()
 	
 	bool isconnected = test.IsConnected();
 	
-	
+
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connected: %d"), isconnected));
+
 	
 	// Spawn the Agent
 	Agent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 

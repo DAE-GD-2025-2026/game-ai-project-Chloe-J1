@@ -107,18 +107,18 @@ namespace GameAI
 		// TODO Mark the visited node
 		if(Nodes[startIndex]->GetId() == Graphs::InvalidNodeId)
 			return;
-		
+    
 		visited[startIndex] = true;
 		// TODO Ask the graph for the connections from that node
-		
+    
 		std::vector<Connection*> Connections = m_pGraph->FindConnectionsFrom(startIndex);
 		// TODO recursively visit any valid connected nodes that were not visited before
-		
+    
 		for (int index = 0; index < Connections.size(); ++index)
 		{
-			int checkIdx = Connections[index]->GetToId();
-			if (visited[checkIdx] == false)
-				VisitAllNodesDFS(Nodes, visited, checkIdx);
+			int CheckIdx = Connections[index]->GetToId();
+			if (visited[CheckIdx] == false)
+				VisitAllNodesDFS(Nodes, visited, CheckIdx);
 		}
 		// TODO Tip: use an index-based for-loop to find the correct index
 	}
@@ -128,6 +128,9 @@ namespace GameAI
 		std::vector<Node*> Nodes = m_pGraph->GetActiveNodes();
 		if (Nodes.size() == 0)
 			return false;
+		
+		
+			
 		
 		std::vector<bool> Visited(Nodes.size(), false);
 		// TODO choose a starting node
