@@ -26,8 +26,6 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 protected:
-	UPROPERTY()
-	APlayerController* PlayerController{nullptr};
 	
 	virtual void BeginPlay() override;
 	virtual void BeginDestroy() override;
@@ -45,6 +43,5 @@ private:
 	
 	void UpdateAgentPath( std::vector<GameAI::Node*> const & Trail);
 	
-	
-	bool m_hasUpdated{false}; // TEMP
+	bool m_hasUpdated{false}; //TEMP
 };

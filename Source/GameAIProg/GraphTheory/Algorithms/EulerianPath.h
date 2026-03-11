@@ -99,18 +99,15 @@ namespace GameAI
 			break;
 		}
 
+		
 		while (Stack.size() > 0 || graphCopy.FindConnectionsFrom(currentNodeId).size() > 0)
 		{
 			if (graphCopy.FindConnectionsFrom(currentNodeId).size() > 0)
 			{
 				Stack.push(currentNodeId); // Add node to stack
-				// Connection* pConnection = m_pGraph->FindConnectionsFrom(currentNodeId)[0]; // Take any of its neighbors
-				// currentNodeId = pConnection->GetToId(); // Set that neighbor as the current node
-				// graphCopy.RemoveConnection(pConnection); // Remove edge between selected
-				Connection* pConnection = graphCopy.FindConnectionsFrom(currentNodeId)[0];
-				int nextNodeId = pConnection->GetToId();
-				graphCopy.RemoveConnection(currentNodeId, nextNodeId);
-				currentNodeId = nextNodeId;
+				Connection* pConnection = graphCopy.FindConnectionsFrom(currentNodeId)[0]; // Take any of its neighbors
+				currentNodeId = pConnection->GetToId(); // Set that neighbor as the current node
+				graphCopy.RemoveConnection(pConnection); // Remove edge between selected
 			}
 			else // No more neighbors
 			{
