@@ -282,6 +282,7 @@ namespace GameAI
         }
 			
         return AmountRemoved > 0;
+        
     }
 
     bool Graph::RemoveConnection(int FromNodeId, int ToNodeId)

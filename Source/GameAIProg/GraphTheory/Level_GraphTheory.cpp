@@ -48,15 +48,17 @@ void ALevel_GraphTheory::BeginPlay()
 	auto NodeId2 = Graph.AddNode(std::make_unique<Node>(FVector2D{100.f,100.f}));
 	Graph.AddConnection(NodeId1, NodeId2);
 	
-	auto NodeId3 = Graph.AddNode(std::make_unique<Node>(FVector2D{100.f,150.f}));
+	auto NodeId3 = Graph.AddNode(std::make_unique<Node>(FVector2D{500.f,150.f}));
+	Graph.AddConnection(NodeId2, NodeId3);
 	
 	EulerianPath test{&Graph};
 	
 	bool isconnected = test.IsConnected();
 	
-
 	if (GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Connected: %d"), isconnected));
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("connected: %d"), isconnected));
+
+	
 
 	
 	// Spawn the Agent
@@ -116,15 +118,45 @@ void ALevel_GraphTheory::Tick(float DeltaTime)
 	Renderer.RenderGraph(Graph);
 	
 	// TODO Check if the graph has updated
-	// TODO if so, run the EulerianPath algorithm
-	// TODO if a path is found, have the agent follow it
+	if (!m_hasUpdated)
+	{
+		// TODO if so, run the EulerianPath algorithm
+
+		EulerianPath eulerianPath{&Graph};
+		Eulerianity eulerianity = eulerianPath.IsEulerian();
+		FString EulerianityStr;
+		switch (eulerianity)
+		{
+		case Eulerianity::notEulerian:   EulerianityStr = "notEulerian"; break;
+		case Eulerianity::semiEulerian:  EulerianityStr = "semiEulerian"; break;
+		case Eulerianity::eulerian:      EulerianityStr = "eulerian"; break;
+		}
+
+		if (GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("Eulerianity: %s"), *EulerianityStr));
+		std::vector<Node*> pathNodes = eulerianPath.FindPath(eulerianity);
+		 // TODO if a path is found, have the agent follow it
+		if (pathNodes.size() > 0)
+			UpdateAgentPath(pathNodes);
+		m_hasUpdated = true;
+	}
+	
 }
 
 void ALevel_GraphTheory::UpdateAgentPath(std::vector<Node*> const& Trail)
 {
 	std::vector<FVector2D> path{};
 	
+	
+	
 	// TODO convert Node vector to positions vector
+	for (const auto& Node : Trail)
+	{
+		path.emplace_back(Node->GetPosition());
+	}
+	
+	if (GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Path size: %d"), path.size()));
 
 	PathFollow.SetPath(path);
 	if (path.size() > 0)

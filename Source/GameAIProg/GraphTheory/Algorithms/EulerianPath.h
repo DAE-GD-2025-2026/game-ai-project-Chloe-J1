@@ -73,30 +73,54 @@ namespace GameAI
 		// Get a copy of the graph because this algorithm involves removing edges
 		Graph graphCopy = m_pGraph->Clone();
 		std::vector<Node*> Path = {};
+		std::stack<int> Stack;
 		std::vector<Node*> Nodes = graphCopy.GetActiveNodes();
 		int currentNodeId{ Graphs::InvalidNodeId };
 		
 		// TODO Check if there can be an Euler path
 		// TODO If this graph is not eulerian, return the empty path
-		
+		// Choose starting node
 		switch (eulerianity)
 		{
-			case Eulerianity::notEulerian:
+		case Eulerianity::notEulerian:
 			return Path;
+		case Eulerianity::semiEulerian:
+			for(const auto& Node : Nodes)
+			{
+				if (IsOddDegree(Node->GetId()))
+				{
+					currentNodeId = Node->GetId();
+					break;
+				}
+			}
 			break;
-			case Eulerianity::semiEulerian:
-			break;
-			case Eulerianity::eulerian:
+		case Eulerianity::eulerian:
+			currentNodeId = 0;
 			break;
 		}
-		
-		for (const auto& Node : Nodes)
+
+		while (Stack.size() > 0 || graphCopy.FindConnectionsFrom(currentNodeId).size() > 0)
 		{
-			
+			if (graphCopy.FindConnectionsFrom(currentNodeId).size() > 0)
+			{
+				Stack.push(currentNodeId); // Add node to stack
+				// Connection* pConnection = m_pGraph->FindConnectionsFrom(currentNodeId)[0]; // Take any of its neighbors
+				// currentNodeId = pConnection->GetToId(); // Set that neighbor as the current node
+				// graphCopy.RemoveConnection(pConnection); // Remove edge between selected
+				Connection* pConnection = graphCopy.FindConnectionsFrom(currentNodeId)[0];
+				int nextNodeId = pConnection->GetToId();
+				graphCopy.RemoveConnection(currentNodeId, nextNodeId);
+				currentNodeId = nextNodeId;
+			}
+			else // No more neighbors
+			{
+				Path.push_back(m_pGraph->GetNode(currentNodeId).get());
+				currentNodeId = Stack.top();
+				Stack.pop();
+			}
 		}
-		
-		// TODO Start algorithm loop
-		std::stack<int> nodeStack;
+		Path.push_back(m_pGraph->GetNode(currentNodeId).get()); // add the last currentnode to the path (after the while loop)
+
 
 		std::reverse(Path.begin(), Path.end());
 		return Path;
@@ -111,7 +135,7 @@ namespace GameAI
 		visited[startIndex] = true;
 		// TODO Ask the graph for the connections from that node
     
-		std::vector<Connection*> Connections = m_pGraph->FindConnectionsFrom(startIndex);
+		std::vector<Connection*> Connections = m_pGraph->FindConnectionsFrom(Nodes[startIndex]->GetId());
 		// TODO recursively visit any valid connected nodes that were not visited before
     
 		for (int index = 0; index < Connections.size(); ++index)
@@ -156,8 +180,8 @@ namespace GameAI
 		
 		NrOfConnections += ConnectionsFrom.size() + ConnectionsTo.size();
 		if (NrOfConnections % 2)
-			return false;
+			return true;
 		
-		return true;
+		return false;
 	}
 }
