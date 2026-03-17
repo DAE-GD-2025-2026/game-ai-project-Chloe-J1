@@ -57,19 +57,20 @@ SteeringOutput Arrive::CalculateSteering(float DeltaT, ASteeringAgent & Agent)
 	
 	//Adapt speed based on radius
 	float distance = Steering.LinearVelocity.Length();
-	if (distance < TargetRadius )
-	{
-		Agent.SetMaxLinearSpeed(0.f);
-	}
-	else if (distance < SlowRadius)
-	{
-		Agent.SetMaxLinearSpeed(Steering.LinearVelocity.Length() / 3.f);
-	}
-	else
-	{
-		// Use original speed
-		Agent.SetMaxLinearSpeed(Steering.LinearVelocity.Length());
-	}
+	// NOT USED FOR PATHFINDING
+	// if (distance < TargetRadius )
+	// {
+	// 	Agent.SetMaxLinearSpeed(0.f);
+	// }
+	// else if (distance < SlowRadius)
+	// {
+	// 	Agent.SetMaxLinearSpeed(Steering.LinearVelocity.Length() / 3.f);
+	// }
+	// else
+	// {
+	// 	// Use original speed
+	// 	Agent.SetMaxLinearSpeed(Steering.LinearVelocity.Length());
+	// }
 	
 	// Draw helper lines
 	if (Agent.GetDebugRenderingEnabled())
