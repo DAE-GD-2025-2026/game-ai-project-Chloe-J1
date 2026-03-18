@@ -50,7 +50,7 @@ int GameAI::NavGraph::GetNodeIdFromEdgeIndex(int EdgeIdx) const
 void GameAI::NavGraph::CreateNavigationGraph()
 {
 	//1. Go over all the edges of the navigation mesh and create nodes
-			// Create node here
+			
 	
 	for (const TriPolygon::Edge& edge: pNavPoly->GetEdges())
 	{
@@ -63,16 +63,41 @@ void GameAI::NavGraph::CreateNavigationGraph()
 				auto result = pNavPoly->FindEdgeIndex(edge);
 				if (result.has_value())
 				{
+					// Create node here
 					std::unique_ptr<NavGraphNode> newNode = std::make_unique<NavGraphNode>(pos , result.value());
 					this->AddNode(std::move(newNode));
 				}
 			}
 		}
 	}
-
-	//2. Create connections now that every node is created	
+	std::vector<int> nodeIds;
+	//2. Create connections now that every node is created
+	for (const TriPolygon::Triangle& triangle : pNavPoly->GetTriangles())
+	{
+		for (const auto& edge : triangle.GetEdges())
+		{
+			auto result = pNavPoly->FindEdgeIndex(edge);
+			if (result.has_value())
+			{
+				nodeIds.push_back(GetNodeIdFromEdgeIndex(result.value()));
+			}
+		}
 		//2 valid nodes -> 1 connection
+		if (nodeIds.size() == 2)
+		{
+			this->AddConnection(std::make_unique<Connection>(nodeIds[0], nodeIds[1]));
+		}
 		//3 valid nodes -> 3 connections
+		else if (nodeIds.size() == 3)
+		{
+			this->AddConnection(std::make_unique<Connection>(nodeIds[0], nodeIds[1]));
+			this->AddConnection(std::make_unique<Connection>(nodeIds[1], nodeIds[2]));
+			this->AddConnection(std::make_unique<Connection>(nodeIds[2], nodeIds[0]));
+		}
+		
+		nodeIds.clear();
+		
+	}
 		
 	//3. Set the connections cost to the actual distance
 }
