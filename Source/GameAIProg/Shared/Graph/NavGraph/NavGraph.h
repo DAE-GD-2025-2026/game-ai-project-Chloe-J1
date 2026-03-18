@@ -19,5 +19,7 @@ namespace GameAI
 		std::unique_ptr<TriPolygon> pNavPoly;
 
 		void CreateNavigationGraph();
+		
+		float GetDistance(int id1, int id2) const;
 	};
 }

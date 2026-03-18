@@ -72,6 +72,7 @@ void GameAI::NavGraph::CreateNavigationGraph()
 	}
 	std::vector<int> nodeIds;
 	//2. Create connections now that every node is created
+	//3. Set the connections cost to the actual distance
 	for (const TriPolygon::Triangle& triangle : pNavPoly->GetTriangles())
 	{
 		for (const auto& edge : triangle.GetEdges())
@@ -85,19 +86,31 @@ void GameAI::NavGraph::CreateNavigationGraph()
 		//2 valid nodes -> 1 connection
 		if (nodeIds.size() == 2)
 		{
-			this->AddConnection(std::make_unique<Connection>(nodeIds[0], nodeIds[1]));
+			Connection newConnection{ nodeIds[0], nodeIds[1]};
+			newConnection.SetWeight(GetDistance(nodeIds[0], nodeIds[1]));
+			this->AddConnection(std::make_unique<Connection>(newConnection));
 		}
 		//3 valid nodes -> 3 connections
 		else if (nodeIds.size() == 3)
 		{
-			this->AddConnection(std::make_unique<Connection>(nodeIds[0], nodeIds[1]));
-			this->AddConnection(std::make_unique<Connection>(nodeIds[1], nodeIds[2]));
-			this->AddConnection(std::make_unique<Connection>(nodeIds[2], nodeIds[0]));
+			std::unique_ptr<Connection> newConnection = std::make_unique<Connection>(nodeIds[0], nodeIds[1]);
+			newConnection->SetWeight(GetDistance(nodeIds[0], nodeIds[1]));
+			this->AddConnection(std::move(newConnection));
+			newConnection = std::make_unique<Connection>(nodeIds[1], nodeIds[2]);
+			newConnection->SetWeight(GetDistance(nodeIds[1], nodeIds[2]));
+			this->AddConnection(std::move(newConnection));
+			newConnection = std::make_unique<Connection>(nodeIds[2], nodeIds[0]);
+			newConnection->SetWeight(GetDistance(nodeIds[2], nodeIds[0]));
+			this->AddConnection(std::move(newConnection));
 		}
 		
 		nodeIds.clear();
 		
 	}
 		
-	//3. Set the connections cost to the actual distance
+}
+
+float GameAI::NavGraph::GetDistance(int id1, int id2) const
+{
+	return (this->GetNodeAs<Node>(id1)->GetPosition() - this->GetNodeAs<Node>(id2)->GetPosition()).Length();
 }
