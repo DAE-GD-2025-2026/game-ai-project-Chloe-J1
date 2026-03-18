@@ -45,13 +45,19 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 				if (closedList[index].pNode == pNextNode)
 				{
 					if (closedList[index].costSoFar < totalGCost)
+					{
 						continue;
+					}
 					else
+					{
 						closedList.erase(closedList.begin() + index);
+						
+					}
 					break;
 				}
 			}
 
+			
 			
 			// 4. Check if the connection leads to a node already on the openlist
 			for (int index = 0; index < openList.size(); ++index)
@@ -101,6 +107,6 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 
 float AStar::GetHeuristicCost(Node* const pStartNode, Node* const pEndNode) const
 {
-	FVector2D toDestination = pGraph->GetNode(pEndNode->GetId())->GetPosition() - pGraph->GetNode(pStartNode->GetId())->GetPosition();
+	FVector2D toDestination = pGraph->GetNode(pEndNode->GetId())->GetPosition() - pGraph->GetNode(pStartNode->GetId())->GetPosition(); // col & row ipv worldpos
 	return HeuristicFunction(abs(toDestination.X), abs(toDestination.Y));
 }

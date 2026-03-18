@@ -22,6 +22,7 @@ namespace GameAI
     {
         return Position;
     }
+
     void Node::SetPosition(FVector2D const& NewPos)
     {
         Position = NewPos;
