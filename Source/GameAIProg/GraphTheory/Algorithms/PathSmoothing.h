@@ -79,7 +79,7 @@ static std::vector<NavLine> FindPortals(std::vector<Node*> const& Path, TriPolyg
 
         // Store portal
         NavLine Portal{};
-    	if (Cross2D > 0.f) // was < 0.f
+    	if (Cross2D < 0.f)
     	{
     		Portal.P1 = FVector2D(P2.X, P2.Y); // right
     		Portal.P2 = FVector2D(P1.X, P1.Y); // left
@@ -110,7 +110,7 @@ static std::vector<NavLine> FindPortals(std::vector<Node*> const& Path, TriPolyg
 		FVector2D rightLeg{};
 		FVector2D leftLeg{};
 		FVector2D apexPoint{Portals[0].P1};
-		int apexIndex  = 0;
+		// int apexIndex  = 0;
 		int rightLegIndex = 0;
 		int leftLegIndex  = 0;
 		
@@ -122,14 +122,13 @@ static std::vector<NavLine> FindPortals(std::vector<Node*> const& Path, TriPolyg
 			//--- RIGHT CHECK ---
 			FVector2D newRightLeg{currentPortal.P1 - apexPoint};
 			//1. See if moving funnel inwards - RIGHT
-			if (FVector2D::CrossProduct(rightLeg, newRightLeg) <= 0) // Going inward
+			if (FVector2D::CrossProduct(rightLeg, newRightLeg) >= 0) // Going inward
 			{
 				//2. See if new line degenerates a line segment - RIGHT
-				if (FVector2D::CrossProduct(leftLeg, newRightLeg) <= 0) // Cross left leg
+				if (FVector2D::CrossProduct(leftLeg, newRightLeg) >= 0) // Cross left leg
 				{
 					//Leftleg becomes new apex point
 					apexPoint += leftLeg;
-					apexIndex = leftLegIndex;
 					portalIdx = leftLegIndex + 1;
 					leftLegIndex = portalIdx;
 					rightLegIndex = portalIdx;
@@ -155,14 +154,13 @@ static std::vector<NavLine> FindPortals(std::vector<Node*> const& Path, TriPolyg
 			//--- LEFT CHECK ---
 			FVector2D newLeftLeg{currentPortal.P2 - apexPoint};
 			//1. See if moving funnel inwards - LEFT
-			if (FVector2D::CrossProduct(leftLeg, newLeftLeg) >= 0)
+			if (FVector2D::CrossProduct(leftLeg, newLeftLeg) <= 0)
 			{
 				//2. See if new line degenerates a line segment - LEFT
-				if (FVector2D::CrossProduct(rightLeg, newLeftLeg) >= 0)
+				if (FVector2D::CrossProduct(rightLeg, newLeftLeg) <= 0)
 				{
 					//Rightleg becomes new apex point
 					apexPoint += rightLeg;
-					apexIndex = rightLegIndex;
 					portalIdx = rightLegIndex + 1;
 					rightLegIndex = portalIdx;
 					leftLegIndex = portalIdx;

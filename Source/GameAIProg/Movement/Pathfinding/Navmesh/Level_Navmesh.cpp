@@ -102,17 +102,13 @@ void ALevel_Navmesh::Tick(float DeltaTime)
 	{
 		for (GameAI::NavLine const& Portal : DebugPortals)
 		{
-			// Teken de portallijn
 			DrawDebugLine(
 				GetWorld(),
 				FVector{Portal.P1, 5.f},
 				FVector{Portal.P2, 5.f},
 				FColor::Green, false, -1, 0, 5);
-        
-			// Teken P1 (rechts) in rood
+			
 			DrawDebugPoint(GetWorld(), FVector{Portal.P1, 5.f}, 15.f, FColor::Red);
-        
-			// Teken P2 (links) in blauw
 			DrawDebugPoint(GetWorld(), FVector{Portal.P2, 5.f}, 15.f, FColor::Blue);
 		}
 	}
