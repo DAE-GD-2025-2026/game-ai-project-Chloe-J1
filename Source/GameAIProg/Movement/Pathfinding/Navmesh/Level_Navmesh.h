@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GraphTheory/Level_GraphTheory.h"
 #include "Shared/Graph/NavGraph/NavGraph.h"
+#include "GraphTheory/Algorithms/NavGraphPathfinding.h"
 #include "Level_Navmesh.generated.h"
 
 UCLASS()
@@ -41,11 +42,12 @@ private:
 	bool bDrawNavPoly{true};
 	bool bDrawNavGraph{true};
 	bool bDrawPath{true};
-	bool bDrawPortals{false};
+	bool bDrawPortals{true};
 	
 	void UpdateImGui();
 	
 	TArray<TArray<FVector>> ExtractNavMeshTris() const;
+	std::vector<GameAI::NavLine> DebugPortals{};
 	
 	// Input functions
 	void SetTarget();

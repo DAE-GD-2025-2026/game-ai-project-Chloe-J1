@@ -78,15 +78,17 @@ std::vector<FVector2D> NavMeshPathfinding::FindPath(const FVector2D& startPos, c
 
 	std::vector<Node*> nodePath = AStar.FindPath(pStartNode, pEndNode);
 	//Debug Visualisation
-	for (Node* pNode : nodePath)
-	{
-		debugNodePositions.push_back(pNode->GetPosition());
-		finalPath.push_back(pNode->GetPosition());
-	}
+	// for (Node* pNode : nodePath)
+	// {
+	// 	debugNodePositions.push_back(pNode->GetPosition());
+	// 	finalPath.push_back(pNode->GetPosition());
+	// }
+	
+	
 
 	// Extra: Run optimiser on new graph (First check if everything works without SSFA!)
-	// debugPortals = SSFA::FindPortals(nodes, *pNavGraph->GetNavPolygon());
-	// finalPath = SSFA::OptimizePortals(debugPortals, *pNavGraph->GetNavPolygon());
+	debugPortals = SSFA::FindPortals(nodePath, *pNavGraph->GetNavPolygon());
+	finalPath = SSFA::OptimizePortals(debugPortals, *pNavGraph->GetNavPolygon());
 	
 	
 	return finalPath;
