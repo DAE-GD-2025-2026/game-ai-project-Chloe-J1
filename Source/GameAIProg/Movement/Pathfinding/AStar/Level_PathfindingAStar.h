@@ -68,4 +68,6 @@ private:
 	void SetStartNodeId();
 	void SetEndNodeId();
 	void SetNodeTerrain(GameAI::TerrainNode::Type TerrainType);
+	
+	const float CellSize{ 200.f };
 };

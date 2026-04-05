@@ -2,11 +2,15 @@
 
 #include <unordered_set>
 
+#include "VerseVM/VVMValuePrinting.h"
+
 using namespace GameAI;
 
-AStar::AStar(Graph* const pGraph, HeuristicFunctions::Heuristic hFunction)
+AStar::AStar(Graph* const pGraph, HeuristicFunctions::Heuristic hFunction, HeuristicCalc hCalculation, const float cellsize)
 	: pGraph(pGraph)
 	, HeuristicFunction(hFunction)
+	, HeuristicCalculation(hCalculation)
+	, CellSize(cellsize)
 {
 }
 
@@ -36,9 +40,9 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 
 		for (Connection* connection : pGraph->FindConnectionsFrom(currentNodeRecord.pNode->GetId()))
 		{
-			pNextNode = pGraph->GetNodeAs<Node>(connection->GetToId()); // 1.
-			totalGCost = currentNodeRecord.costSoFar + connection->GetWeight(); // 2.
-			// 3. Check if the connection leads to a node already on the closedList
+			pNextNode = pGraph->GetNodeAs<Node>(connection->GetToId());
+			totalGCost = currentNodeRecord.costSoFar + connection->GetWeight();
+			// Check if the connection leads to a node already on the closedList
 			
 			for (int index = 0; index < closedList.size(); ++index)
 			{
@@ -59,7 +63,7 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 
 			
 			
-			// 4. Check if the connection leads to a node already on the openlist
+			// Check if the connection leads to a node already on the openlist
 			for (int index = 0; index < openList.size(); ++index)
 			{
 				if (openList[index].pNode == pNextNode)
@@ -73,7 +77,7 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 			}
 	
 			
-			// 5. new record
+			// new record
 			NodeRecord newRecord{};
 			newRecord.pNode = pNextNode;
 			newRecord.pConnection = connection;
@@ -107,6 +111,12 @@ std::vector<Node*>AStar::FindPath(Node* const pStartNode, Node* const pGoalNode)
 
 float AStar::GetHeuristicCost(Node* const pStartNode, Node* const pEndNode) const
 {
-	FVector2D toDestination = pGraph->GetNode(pEndNode->GetId())->GetPosition() - pGraph->GetNode(pStartNode->GetId())->GetPosition(); // col & row ipv worldpos
+	FVector2D toDestination = pGraph->GetNode(pEndNode->GetId())->GetPosition() - pGraph->GetNode(pStartNode->GetId())->GetPosition();
+	switch (HeuristicCalculation)
+	{
+	case HeuristicCalc::GridIndex:
+		toDestination /= CellSize;
+		break;
+	}
 	return HeuristicFunction(abs(toDestination.X), abs(toDestination.Y));
 }

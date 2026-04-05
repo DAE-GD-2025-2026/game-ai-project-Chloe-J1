@@ -6,10 +6,16 @@
 
 namespace GameAI
 {
+	enum class HeuristicCalc
+	{
+		WorldPosition,
+		GridIndex
+	};
+	
 	class AStar
 	{
 	public:
-		AStar(Graph* const pGraph, HeuristicFunctions::Heuristic hFunction);
+		AStar(Graph* const pGraph, HeuristicFunctions::Heuristic hFunction, HeuristicCalc hCalculation, const float cellsize = 1.f);
 
 		// stores the optimal connection to a node and its total costs related to the start and end node of the path
 		struct NodeRecord final
@@ -40,5 +46,7 @@ namespace GameAI
 
 		Graph* pGraph;
 		HeuristicFunctions::Heuristic HeuristicFunction;
+		HeuristicCalc HeuristicCalculation;
+		const float CellSize;
 	};
 }

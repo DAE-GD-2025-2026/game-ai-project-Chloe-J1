@@ -50,7 +50,7 @@ void ALevel_PathfindingAStar::BeginPlay()
 	Renderer->SetRenderOptions(RenderOptions);
 	
 	NodeFactory = new TerrainNodeFactory{};
-	TerrainGraph = new TerrainGridGraph{NodeFactory, 10, 10, 200.0f, 1.0f, 
+	TerrainGraph = new TerrainGridGraph{NodeFactory, 10, 10, CellSize, 1.0f, 
 		FVector2D{-1000.0f, -1000.0f}, false};
 	
 	CalculatePath();
@@ -107,7 +107,7 @@ void ALevel_PathfindingAStar::CalculatePath()
 	{
 		//Select (uncomment) BFS Pathfinding or A* Pathfinding
 		//BFS pathfinder = BFS(TerrainGraph);
-		 AStar pathfinder = AStar(TerrainGraph, HeuristicFunction);
+		AStar pathfinder = AStar(TerrainGraph, HeuristicFunction, HeuristicCalc::GridIndex, CellSize); // calc heuristic cost based on gridindex
 		TerrainNode* const startNode = TerrainGraph->GetNodeAs<TerrainNode>(PathStartNodeId);
 		TerrainNode* const endNode = TerrainGraph->GetNodeAs<TerrainNode>(PathEndNodeId);
 

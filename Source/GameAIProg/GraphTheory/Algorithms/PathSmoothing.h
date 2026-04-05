@@ -15,94 +15,74 @@ public:
 	//--- References ---
 	//http://digestingduck.blogspot.be/2010/03/simple-stupid-funnel-algorithm.html
 	//https://gamedev.stackexchange.com/questions/68302/how-does-the-simple-stupid-funnel-algorithm-work
-	// static std::vector<NavLine> FindPortals(std::vector<Node*> const & Path, TriPolygon const & NavPoly)
-	// {
-	// 	//Container
-	// 	std::vector<NavLine> Portals = {};
-	// 	if (Path.empty()) return Portals;
-	// 	
-	// 	//For each node received, get it's corresponding line
-	// 	
-	// 		//Redetermine it's "orientation" based on the required path (left-right vs right-left) - p1 should be right point
-	//
-	// 		//Store portal
-	//
-	// 	//Add degenerate portal to force end evaluation
-	//
-	// 	return Portals;
-	// }
-		
-static std::vector<NavLine> FindPortals(std::vector<Node*> const& Path, TriPolygon const& NavPoly)
-{
-    std::vector<NavLine> Portals = {};
+	static std::vector<NavLine> FindPortals(std::vector<Node*> const& Path, TriPolygon const& NavPoly)
+	{
+	    std::vector<NavLine> Portals = {};
 
-    if (Path.empty()) return Portals;
+	    if (Path.empty()) return Portals;
 
-    // First portal: start position
-    {
-        NavLine StartPortal{};
-        StartPortal.P1 = Path.front()->GetPosition();
-        StartPortal.P2 = Path.front()->GetPosition();
-        Portals.push_back(StartPortal);
-    }
+	    // Start pos
+	    {
+	        NavLine StartPortal{};
+	        StartPortal.P1 = Path.front()->GetPosition();
+	        StartPortal.P2 = Path.front()->GetPosition();
+	        Portals.push_back(StartPortal);
+	    }
 
-    // For each node received, get its corresponding line
-    for (int index = 1; index < static_cast<int>(Path.size()) - 1; ++index)
-    {
-        FVector2D NodePos     = Path[index]->GetPosition();
-        FVector2D NextNodePos = Path[index + 1]->GetPosition();
+	    // For each node received, get its corresponding line
+	    for (int index = 1; index < static_cast<int>(Path.size()) - 1; ++index)
+	    {
+	        FVector2D NodePos     = Path[index]->GetPosition();
+	        FVector2D NextNodePos = Path[index + 1]->GetPosition();
+    		
+    		std::optional<TriPolygon::Edge> CorrespondingEdge;
+    		for (const TriPolygon::Edge& Edge : NavPoly.GetEdges())
+    		{
+    			FVector Centre = (Edge.GetP1(NavPoly) + Edge.GetP2(NavPoly)) / 2.f;
+    			FVector2D Centre2D(Centre.X, Centre.Y);
+    			if (FVector2D::Distance(Centre2D, NodePos) < 1.f)
+    			{
+    				CorrespondingEdge = Edge;
+    				break;
+    			}
+    		}
 
-        // Find the edge whose midpoint matches the node position
-        int foundEdgeIdx = -1;
-        for (int e = 0; e < static_cast<int>(NavPoly.GetEdges().size()); ++e)
-        {
-            TriPolygon::Edge const& E = NavPoly.GetEdges()[e];
-            FVector Mid   = (E.GetP1(NavPoly) + E.GetP2(NavPoly)) / 2.f;
-            FVector2D Mid2D(Mid.X, Mid.Y);
-            if (FVector2D::Distance(Mid2D, NodePos) < 1.f)
-            {
-                foundEdgeIdx = e;
-                break;
-            }
-        }
+    		if (!CorrespondingEdge) continue;
 
-        if (foundEdgeIdx < 0) continue;
+    		FVector P1 = CorrespondingEdge->GetP1(NavPoly);
+    		FVector P2 = CorrespondingEdge->GetP2(NavPoly);
 
-        TriPolygon::Edge const& Edge = NavPoly.GetEdges()[foundEdgeIdx];
-        FVector P1 = Edge.GetP1(NavPoly);
-        FVector P2 = Edge.GetP2(NavPoly);
+    		// Redetermine it's "orientation" based on the required path (left-right vs right-left) - p1 should be right point
+	        FVector2D Direction     = (NextNodePos - NodePos).GetSafeNormal();
+	        FVector2D EdgeVec = FVector2D(P2.X - P1.X, P2.Y - P1.Y);
+	        float Cross     = Direction.X * EdgeVec.Y - Direction.Y * EdgeVec.X;
 
-        // Redetermine orientation - P1 should be right point
-        FVector2D Dir     = (NextNodePos - NodePos).GetSafeNormal();
-        FVector2D EdgeVec = FVector2D(P2.X - P1.X, P2.Y - P1.Y);
-        float Cross2D     = Dir.X * EdgeVec.Y - Dir.Y * EdgeVec.X;
+	        // Store portal
+	        NavLine Portal{};
+    		if (Cross < 0.f)
+    		{
+    			Portal.P1 = FVector2D(P2.X, P2.Y); // right
+    			Portal.P2 = FVector2D(P1.X, P1.Y); // left
+    		}
+    		else
+    		{
+    			Portal.P1 = FVector2D(P1.X, P1.Y); // right
+    			Portal.P2 = FVector2D(P2.X, P2.Y); // left
+    		}
 
-        // Store portal
-        NavLine Portal{};
-    	if (Cross2D < 0.f)
-    	{
-    		Portal.P1 = FVector2D(P2.X, P2.Y); // right
-    		Portal.P2 = FVector2D(P1.X, P1.Y); // left
-    	}
-    	else
-    	{
-    		Portal.P1 = FVector2D(P1.X, P1.Y); // right
-    		Portal.P2 = FVector2D(P2.X, P2.Y); // left
-    	}
+	        Portals.push_back(Portal);
+	    }
 
-        Portals.push_back(Portal);
-    }
+	    // Add degenerate portal to force end evaluation
+	    {
+	        NavLine EndPortal{};
+	        EndPortal.P1 = Path.back()->GetPosition();
+	        EndPortal.P2 = Path.back()->GetPosition();
+	        Portals.push_back(EndPortal);
+	    }
 
-    // Add degenerate portal to force end evaluation
-    {
-        NavLine EndPortal{};
-        EndPortal.P1 = Path.back()->GetPosition();
-        EndPortal.P2 = Path.back()->GetPosition();
-        Portals.push_back(EndPortal);
-    }
-
-    return Portals;
-}
+	    return Portals;
+	}
 
 	static std::vector<FVector2D> OptimizePortals( std::vector<NavLine> const & Portals, TriPolygon const & NavPoly)
 	{
