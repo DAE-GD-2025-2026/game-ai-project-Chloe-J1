@@ -7,6 +7,7 @@
 #include "AI/NavigationSystemBase.h"
 #include "GraphTheory/Algorithms/AStar.h"
 #include "GraphTheory/Algorithms/NavGraphPathfinding.h"
+#include "Interfaces/IPluginManager.h"
 #include "NavMesh/RecastNavMesh.h"
 #include "Runtime/Navmesh/Public/Detour/DetourNavMesh.h"
 #include "Shared/GameAISpectator.h"
@@ -102,14 +103,8 @@ void ALevel_Navmesh::Tick(float DeltaTime)
 	{
 		for (GameAI::NavLine const& Portal : DebugPortals)
 		{
-			DrawDebugLine(
-				GetWorld(),
-				FVector{Portal.P1, 5.f},
-				FVector{Portal.P2, 5.f},
-				FColor::Green, false, -1, 0, 5);
-			
-			DrawDebugPoint(GetWorld(), FVector{Portal.P1, 5.f}, 15.f, FColor::Red);
-			DrawDebugPoint(GetWorld(), FVector{Portal.P2, 5.f}, 15.f, FColor::Blue);
+			DrawDebugLine(GetWorld(),FVector{Portal.P1, 5.f},FVector{Portal.P2, 5.f},
+				FColor::Green, false, -1, 2, 5);
 		}
 	}
 	
