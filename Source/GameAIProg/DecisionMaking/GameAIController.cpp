@@ -12,7 +12,8 @@ AGameAIController::AGameAIController()
 {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-	BrainComponent = CreateDefaultSubobject<UFSMComponent>(TEXT("FSMComponent"));;
+	BrainComponent = CreateDefaultSubobject<UFSMComponent>(TEXT("FSMComponent"));
+	
 }
 
 // Called when the game starts or when spawned
@@ -35,9 +36,11 @@ void AGameAIController::InitFiniteStateMachine()
 	UFSMComponent* FSMComp = FindComponentByClass<UFSMComponent>();
 	if (ensure(FSMComp) && FSMBlackboardAsset)
 	{
-		UBlackboardComponent* BlackboardComp = Blackboard;
+		UBlackboardComponent* BlackboardComp = Blackboard; // Blackboard member of AAIController
 		UseBlackboard(FSMBlackboardAsset, BlackboardComp);
 		Blackboard = BlackboardComp;
+		
+		FSMComp->SetBlackboard(BlackboardComp);
 	}
 }
 

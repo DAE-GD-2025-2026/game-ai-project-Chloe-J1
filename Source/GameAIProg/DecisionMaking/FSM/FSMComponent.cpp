@@ -3,6 +3,8 @@
 
 #include "FSMComponent.h"
 
+#include "BehaviorTree/BlackboardComponent.h"
+
 
 // Sets default values for this component's properties
 UFSMComponent::UFSMComponent()
@@ -10,19 +12,32 @@ UFSMComponent::UFSMComponent()
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-
+	
 	// TODO Setup FSM
+	FSMInstance = std::make_unique<GameAI::FSM::FSM>();
 }
 
 
 void UFSMComponent::AddState(std::unique_ptr<GameAI::FSM::State>&& NewState)
 {
-	// TODO
+	FSMInstance->AddState(std::move(NewState));
 }
 
 void UFSMComponent::AddTransition(GameAI::FSM::State* From, GameAI::FSM::State* To, std::function<bool()> EvalFunc) const
 {
 	// TODO
+}
+
+void UFSMComponent::SetBlackboard(UBlackboardComponent* Blackboard)
+{
+	m_blackboard = Blackboard;
+	FSMInstance->SetBlackboard(m_blackboard);
+	FSMInstance->InitBlackboardValues();
+}
+
+void UFSMComponent::SetSteeringAgent(ASteeringAgent* SteeringAgent)
+{
+	FSMInstance->SetSteeringAgent(SteeringAgent);
 }
 
 // Called when the game starts
@@ -37,6 +52,7 @@ void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 	// TODO
+	FSMInstance->Tick(DeltaTime);
 }
 
 void UFSMComponent::StartLogic()
@@ -44,11 +60,13 @@ void UFSMComponent::StartLogic()
 	Super::StartLogic();
 
 	// TODO
+	bIsRunning = true;
 }
 
 void UFSMComponent::StopLogic(const FString& Reason)
 {
 	// TODO
+	bIsRunning = false;
 }
 
 bool UFSMComponent::IsRunning() const
