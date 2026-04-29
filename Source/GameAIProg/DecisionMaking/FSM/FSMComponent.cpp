@@ -33,7 +33,6 @@ void UFSMComponent::SetBlackboard(UBlackboardComponent* Blackboard)
 {
 	m_blackboard = Blackboard;
 	FSMInstance->SetBlackboard(m_blackboard);
-	FSMInstance->InitBlackboardValues();
 }
 
 UBlackboardComponent* UFSMComponent::GetBlackboard() const

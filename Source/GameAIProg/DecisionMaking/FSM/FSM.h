@@ -6,6 +6,7 @@
 #include "FSM.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Movement/SteeringBehaviors/Steering/SteeringBehaviors.h"
+#include "Movement/SteeringBehaviors/CombinedSteering/CombinedSteeringBehaviors.h"
 
 
 namespace GameAI::FSM
@@ -17,6 +18,7 @@ namespace GameAI::FSM
 	{
 	public:
 		State();
+		virtual ~State() = default;
 		
 		virtual void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard) = 0;
 	protected:
@@ -37,6 +39,35 @@ namespace GameAI::FSM
 		virtual void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard) override;
 	};
 	
+	class PatrolState : public State
+	{
+	public:
+		PatrolState(UBlackboardComponent* Blackboard);
+		
+		virtual void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard) override;
+	private:
+		FVector2D m_firstPatrolPoint;
+		FVector2D m_secondPatrolPoint;
+		FVector2D m_currTargetPos;
+		int m_patrolIdx{0};
+		const int m_maxPatrolPoints{2};
+	};
+	
+	class SearchState : public State
+	{
+	public:
+		SearchState(UBlackboardComponent* Blackboard);
+		
+		virtual void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard) override;
+		
+	private:
+		FVector2D m_lastSeenPos;
+		bool m_lastSeenReached{false};
+		
+		std::unique_ptr<Seek> m_seek = std::make_unique<Seek>();
+		std::unique_ptr<Wander> m_wander = std::make_unique<Wander>();
+		std::unique_ptr<PrioritySteering> m_priority = std::make_unique<PrioritySteering>(std::vector<ISteeringBehavior*>{m_seek.get(), m_wander.get()});
+	};
 	// TRANSITION
 	struct Transition
 	{
@@ -57,7 +88,6 @@ namespace GameAI::FSM
 		State* GetStateTransition();
 		void SetBlackboard(UBlackboardComponent* Blackboard);
 		void SetSteeringAgent(ASteeringAgent* SteeringAgent);
-		void InitBlackboardValues();
 	private:
 		State* m_currState{nullptr};
 		std::vector<std::unique_ptr<State>> m_states;

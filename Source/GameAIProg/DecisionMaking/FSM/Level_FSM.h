@@ -18,6 +18,8 @@ public:
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+	bool IsTargetVisible();
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,6 +28,9 @@ protected:
 private:
 	UPROPERTY()
 	ASteeringAgent* Agent{nullptr}; // ref
+	ASteeringAgent* Thief{nullptr}; // ref
 	std::unique_ptr<Seek> m_pSeek{};
 	void SetTarget_Seek();
+	
+	
 };
