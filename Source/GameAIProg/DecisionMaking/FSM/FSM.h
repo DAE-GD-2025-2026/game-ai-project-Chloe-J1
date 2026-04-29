@@ -18,7 +18,7 @@ namespace GameAI::FSM
 	public:
 		State();
 		
-		void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard);
+		virtual void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard) = 0;
 	protected:
 		std::unique_ptr<ISteeringBehavior> m_steeringBehavior;
 	};
@@ -34,7 +34,7 @@ namespace GameAI::FSM
 	public:
 		ChaseState();
 		
-		void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard);
+		virtual void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard) override;
 	};
 	
 	// TRANSITION

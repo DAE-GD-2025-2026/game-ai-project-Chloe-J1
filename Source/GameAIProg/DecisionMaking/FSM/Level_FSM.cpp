@@ -20,11 +20,11 @@ void ALevel_FSM::BeginPlay()
 	Super::BeginPlay();
 	
 	// Non-AI agent
-	Agent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
+	ASteeringAgent* Thief = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
 	FVector{500,100,90}, FRotator::ZeroRotator);
-	Agent->SetDebugRenderingEnabled(false);
+	Thief->SetDebugRenderingEnabled(false);
 	m_pSeek = std::make_unique<Seek>();
-	Agent->SetSteeringBehavior(m_pSeek.get());
+	Thief->SetSteeringBehavior(m_pSeek.get());
 	
 	// AI agent
 	Agent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
@@ -38,16 +38,12 @@ void ALevel_FSM::BeginPlay()
 	{
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
-			FSM->AddState(std::make_unique<GameAI::FSM::TestState>());
-			FSM->SetSteeringAgent(Agent);
-			FSM->GetBlackboard()->SetValueAsObject("Guard", Agent);
+			FSM->AddState(std::make_unique<GameAI::FSM::ChaseState>());
+			FSM->SetSteeringAgent(Agent);	
 			AIController->RunFiniteStateMachine();
+			FSM->GetBlackboard()->SetValueAsObject("Thief", Thief);
 		}
 	} 
-	
-	
-	
-	
 }
 
 void ALevel_FSM::SetTarget_Seek()

@@ -8,20 +8,6 @@ GameAI::FSM::State::State()
 {
 }
 
-void GameAI::FSM::State::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
-{
-	// Update steering behavior
-	if (m_steeringBehavior == nullptr) return;
-	FTargetData target;
-	target.AngularVelocity = 0;
-	target.LinearVelocity = FVector2D(0, 0);
-	target.Position = FVector2D(Blackboard->GetValueAsVector("TargetLocation"));
-	
-	m_steeringBehavior->SetTarget(target);
-	m_steeringBehavior->CalculateSteering(DeltaTime, Agent);
-	Agent.SetSteeringBehavior(m_steeringBehavior.get());
-}
-
 GameAI::FSM::TestState::TestState()
 {
 	m_steeringBehavior = std::make_unique<Seek>();
@@ -34,13 +20,19 @@ GameAI::FSM::ChaseState::ChaseState()
 
 void GameAI::FSM::ChaseState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
 {
-	AActor* GuardActor = dynamic_cast<AActor*>(Blackboard->GetValueAsObject("Guard"));
+	AActor* GuardActor = Cast<AActor>(Blackboard->GetValueAsObject("Thief"));
+	
 	if (GuardActor == nullptr) return;
 	
 	FTargetData target;
 	target.AngularVelocity = 0;
 	target.LinearVelocity = FVector2D(0, 0);
 	target.Position = FVector2D(GuardActor->GetActorLocation());
+	
+	// if (GEngine)
+	// {
+	// 	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Pos: %f %f"), target.Position.X, target.Position.Y));
+	// }
 	
 	m_steeringBehavior->SetTarget(target);	
 	m_steeringBehavior->CalculateSteering(DeltaTime, Agent);
@@ -56,10 +48,10 @@ GameAI::FSM::FSM::FSM()
 void GameAI::FSM::FSM::Tick(float DeltaTime)
 {
 	if (m_currState == nullptr) return;
-
-	//Check for transitions
-	if (State* newState = GetStateTransition())
-	 	m_currState = newState;
+	
+	// //Check for transitions
+	// if (State* newState = GetStateTransition())
+	//  	m_currState = newState;
 	
 	m_currState->Tick(DeltaTime, *m_steeringAgent, m_blackboard);
 
