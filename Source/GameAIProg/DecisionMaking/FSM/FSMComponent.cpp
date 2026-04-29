@@ -26,6 +26,7 @@ void UFSMComponent::AddState(std::unique_ptr<GameAI::FSM::State>&& NewState)
 void UFSMComponent::AddTransition(GameAI::FSM::State* From, GameAI::FSM::State* To, std::function<bool()> EvalFunc) const
 {
 	// TODO
+	FSMInstance->AddTransition(From, To, EvalFunc);
 }
 
 void UFSMComponent::SetBlackboard(UBlackboardComponent* Blackboard)
@@ -33,6 +34,11 @@ void UFSMComponent::SetBlackboard(UBlackboardComponent* Blackboard)
 	m_blackboard = Blackboard;
 	FSMInstance->SetBlackboard(m_blackboard);
 	FSMInstance->InitBlackboardValues();
+}
+
+UBlackboardComponent* UFSMComponent::GetBlackboard() const
+{
+	return m_blackboard;
 }
 
 void UFSMComponent::SetSteeringAgent(ASteeringAgent* SteeringAgent)

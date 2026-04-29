@@ -22,24 +22,29 @@ void GameAI::FSM::State::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboar
 	Agent.SetSteeringBehavior(m_steeringBehavior.get());
 }
 
-void GameAI::FSM::State::AddTransition(State* to,const std::function<bool()>& Condition)
-{
-	m_transitions.push_back(Transition{this, to, Condition});
-}
-
-GameAI::FSM::State* GameAI::FSM::State::GetStateTransition()
-{
-	for (const auto& transition : m_transitions)
-	{
-		if (transition.Condition() == true)
-			return transition.To;
-	}
-	return nullptr; // No valid transition found
-}
-
 GameAI::FSM::TestState::TestState()
 {
 	m_steeringBehavior = std::make_unique<Seek>();
+}
+
+GameAI::FSM::ChaseState::ChaseState()
+{
+	m_steeringBehavior = std::make_unique<Seek>();
+}
+
+void GameAI::FSM::ChaseState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
+{
+	AActor* GuardActor = dynamic_cast<AActor*>(Blackboard->GetValueAsObject("Guard"));
+	if (GuardActor == nullptr) return;
+	
+	FTargetData target;
+	target.AngularVelocity = 0;
+	target.LinearVelocity = FVector2D(0, 0);
+	target.Position = FVector2D(GuardActor->GetActorLocation());
+	
+	m_steeringBehavior->SetTarget(target);	
+	m_steeringBehavior->CalculateSteering(DeltaTime, Agent);
+	Agent.SetSteeringBehavior(m_steeringBehavior.get());
 }
 
 
@@ -52,9 +57,9 @@ void GameAI::FSM::FSM::Tick(float DeltaTime)
 {
 	if (m_currState == nullptr) return;
 
-	// Check for transitions
-	if (State* newState = m_currState->GetStateTransition())
-		m_currState = newState;
+	//Check for transitions
+	if (State* newState = GetStateTransition())
+	 	m_currState = newState;
 	
 	m_currState->Tick(DeltaTime, *m_steeringAgent, m_blackboard);
 
@@ -66,6 +71,21 @@ void GameAI::FSM::FSM::AddState(std::unique_ptr<State>&& NewState)
 		m_currState = NewState.get();
 	
 	m_states.emplace_back(std::move(NewState));
+}
+
+void GameAI::FSM::FSM::AddTransition(State* From, State* To, const std::function<bool()>& Condition)
+{
+	m_transitions.emplace_back(From, To, Condition);
+}
+
+GameAI::FSM::State* GameAI::FSM::FSM::GetStateTransition()
+{
+	for (const auto& transition : m_transitions)
+	{
+		if (transition.Condition() == true)
+			return transition.To;
+	}
+	return nullptr; // No valid transition found
 }
 
 void GameAI::FSM::FSM::SetBlackboard(UBlackboardComponent* Blackboard)

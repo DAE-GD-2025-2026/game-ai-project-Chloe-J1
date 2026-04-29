@@ -19,9 +19,19 @@ void ALevel_FSM::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	// Non-AI agent
+	Agent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
+	FVector{500,100,90}, FRotator::ZeroRotator);
+	Agent->SetDebugRenderingEnabled(false);
+	m_pSeek = std::make_unique<Seek>();
+	Agent->SetSteeringBehavior(m_pSeek.get());
+	
+	// AI agent
 	Agent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
 	FVector{0,0,90}, FRotator::ZeroRotator);
 	Agent->SetDebugRenderingEnabled(false);
+	
+	
 	
 	// TODO
 	if (AGameAIController* AIController = Cast<AGameAIController>(Agent->GetController()))
@@ -30,14 +40,27 @@ void ALevel_FSM::BeginPlay()
 		{
 			FSM->AddState(std::make_unique<GameAI::FSM::TestState>());
 			FSM->SetSteeringAgent(Agent);
+			FSM->GetBlackboard()->SetValueAsObject("Guard", Agent);
 			AIController->RunFiniteStateMachine();
 		}
 	} 
+	
+	
+	
+	
+}
+
+void ALevel_FSM::SetTarget_Seek()
+{
+	if (m_pSeek == nullptr) return;
+	m_pSeek->SetTarget(MouseTarget);
 }
 
 // Called every frame
 void ALevel_FSM::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
+	SetTarget_Seek();
 }
 

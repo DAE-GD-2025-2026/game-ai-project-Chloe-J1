@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Shared/Level_Base.h"
+#include <memory>
 #include "Level_FSM.generated.h"
 
 UCLASS()
@@ -25,4 +26,6 @@ protected:
 private:
 	UPROPERTY()
 	ASteeringAgent* Agent{nullptr}; // ref
+	std::unique_ptr<Seek> m_pSeek{};
+	void SetTarget_Seek();
 };

@@ -32,6 +32,7 @@ public:
 	void AddState(std::unique_ptr<GameAI::FSM::State>&& NewState);
 	void AddTransition(GameAI::FSM::State* From, GameAI::FSM::State* To, std::function<bool()> EvalFunc) const;
 	void SetBlackboard(UBlackboardComponent* Blackboard);
+	UBlackboardComponent* GetBlackboard() const;
 	void SetSteeringAgent(ASteeringAgent* SteeringAgent);
 protected:
 	// Called when the game starts

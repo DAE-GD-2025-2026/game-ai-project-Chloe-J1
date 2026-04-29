@@ -3,20 +3,14 @@
 #include <vector>
 #include <functional>
 
+#include "FSM.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Movement/SteeringBehaviors/Steering/SteeringBehaviors.h"
 
 
 namespace GameAI::FSM
 {
-	class State;
-	// TRANSITION
-	struct Transition
-	{
-		State* From;
-		State* To;
-		std::function<bool()> Condition;
-	};
+	
 	
 	// STATES
 	class State
@@ -25,19 +19,31 @@ namespace GameAI::FSM
 		State();
 		
 		void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard);
-		void AddTransition(State* to,const std::function<bool()>& Condition);
-		State* GetStateTransition();
 	protected:
 		std::unique_ptr<ISteeringBehavior> m_steeringBehavior;
-		std::vector<Transition> m_transitions;
 	};
 	
-	 class TestState : public State
+	class TestState : public State
 	{
 	public:
 		TestState();
 	};
 	
+	class ChaseState : public State
+	{
+	public:
+		ChaseState();
+		
+		void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard);
+	};
+	
+	// TRANSITION
+	struct Transition
+	{
+		State* From;
+		State* To;
+		std::function<bool()> Condition;
+	};
 	
 	// FSM
 	class FSM
@@ -47,6 +53,8 @@ namespace GameAI::FSM
 		void Tick(float DeltaTime);
 		
 		void AddState(std::unique_ptr<State>&& NewState);
+		void AddTransition(State* From, State* To,const std::function<bool()>& Condition);
+		State* GetStateTransition();
 		void SetBlackboard(UBlackboardComponent* Blackboard);
 		void SetSteeringAgent(ASteeringAgent* SteeringAgent);
 		void InitBlackboardValues();
@@ -55,6 +63,7 @@ namespace GameAI::FSM
 		std::vector<std::unique_ptr<State>> m_states;
 		UBlackboardComponent* m_blackboard; // non-owning reference
 		ASteeringAgent* m_steeringAgent;
+		std::vector<Transition> m_transitions;
 	};
 }
 
