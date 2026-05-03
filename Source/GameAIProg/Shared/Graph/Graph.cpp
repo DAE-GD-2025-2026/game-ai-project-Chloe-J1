@@ -229,7 +229,8 @@ namespace GameAI
         return it != Connections.end() ? it->get() : nullptr;
     }
 
-    std::vector<Connection*> Graph::FindConnectionsFrom(int NodeId) const
+    std::vector<Connection*> Graph::
+    FindConnectionsFrom(int NodeId) const
     {
         std::vector<Connection*> Result{};
         for (auto& Connection : Connections)

@@ -38,15 +38,21 @@ void ALevel_FSM::BeginPlay()
 	{
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
-			FSM->GetBlackboard()->SetValueAsVector("FirstPatrolPoint", FVector{130,-400,0});
-			FSM->GetBlackboard()->SetValueAsVector("SecondPatrolPoint", FVector{130,700,0});
-			FSM->GetBlackboard()->SetValueAsObject("Thief", Thief);
+			UBlackboardComponent* BlackBoard = FSM->GetBlackboard();
+			BlackBoard->SetValueAsVector("FirstPatrolPoint", FVector{130,-400,0});
+			BlackBoard->SetValueAsVector("SecondPatrolPoint", FVector{130,700,0});
+			BlackBoard->SetValueAsObject("Thief", Thief);
+			BlackBoard->SetValueAsInt("StartSearchTime", FDateTime::Now().GetSecond()); // Initial value, will be overwritten by Search ctor
 			
 			std::function<bool()> isTargetVisible = [&]()
 			{
             	const float distance = 200.f;
             	if (((Agent->GetActorLocation() - Thief->GetActorLocation()).GetAbs()).Length() < distance)
             	{
+            		if (GEngine)
+            		{
+            			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Target visible")));
+            		}
             		return true;
             	}
             	return false;
@@ -61,18 +67,28 @@ void ALevel_FSM::BeginPlay()
 				return true;
 			};
 			
-			std::function<bool()> isSearchingTooLong = [&]()
+			std::function<bool()> isSearchingTooLong = [BlackBoard]()
 			{
 				const int32 maxSearchTime = 3;
 				FDateTime date = FDateTime::Now();
 				int32 timeNow = date.GetSecond();
-				int32 startTime =  FSM->GetBlackboard()->GetValueAsInt("StartSearchTime");
+				int32 startTime =  BlackBoard->GetValueAsInt("StartSearchTime");
 				
 				
 				if (abs((timeNow - startTime)) < maxSearchTime)
 				{
+					if (GEngine)
+					{
+						GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Search is over")));
+					}
 					return false;
 				}
+
+				if (GEngine)
+				{
+					GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Not enough time passed %d %d"), timeNow, startTime));
+				}
+
 				return true;
 			};
 			

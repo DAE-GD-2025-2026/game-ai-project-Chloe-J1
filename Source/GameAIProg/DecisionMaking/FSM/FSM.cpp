@@ -108,7 +108,6 @@ void GameAI::FSM::FSM::Tick(float DeltaTime)
 	 	m_currState = newState;
 	
 	m_currState->Tick(DeltaTime, *m_steeringAgent, m_blackboard);
-
 }
 
 void GameAI::FSM::FSM::AddState(std::unique_ptr<State>&& NewState)
@@ -128,7 +127,7 @@ GameAI::FSM::State* GameAI::FSM::FSM::GetStateTransition()
 {
 	for (const auto& transition : m_transitions)
 	{
-		if (transition.Condition() == true)
+		if (transition.Condition() == true && transition.From == m_currState)
 			return transition.To;
 	}
 	return nullptr; // No valid transition found
