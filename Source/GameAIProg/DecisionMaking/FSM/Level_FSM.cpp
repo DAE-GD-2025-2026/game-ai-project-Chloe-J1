@@ -38,7 +38,7 @@ void ALevel_FSM::BeginPlay()
 	{
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
-			UBlackboardComponent* BlackBoard = FSM->GetBlackboard();
+			UBlackboardComponent* BlackBoard = FSM->GetBlackboard(); // Note: you can also retrieve blackboard from aicontroller
 			BlackBoard->SetValueAsVector("FirstPatrolPoint", FVector{130,-400,0});
 			BlackBoard->SetValueAsVector("SecondPatrolPoint", FVector{130,700,0});
 			BlackBoard->SetValueAsObject("Thief", Thief);
