@@ -28,6 +28,5 @@ private:
 	ASteeringAgent* Guard{nullptr}; // ref
 	ASteeringAgent* Thief{nullptr}; // ref
 	
-	UPROPERTY(EditAnywhere)
-	UBehaviorTree* BehaviorTreeAsset;
+	
 };

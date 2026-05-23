@@ -30,11 +30,13 @@ void ALevel_BehaviorTree::BeginPlay()
 	
 	if (AGameAIController* AIController = Cast<AGameAIController>(Guard->GetController()))
 	{
-		AIController->RunBehaviorTree(BehaviorTreeAsset);
+		AIController->RunBT();
     
 		UBlackboardComponent* Blackboard = AIController->GetBlackboardComponent();
 		Blackboard->SetValueAsObject("Thief", Thief);
 		Blackboard->SetValueAsVector("TargetLocation", Thief->GetActorLocation());
+		Blackboard->SetValueAsVector("FirstPatrolPoint", FVector{130,-400,0});
+		Blackboard->SetValueAsVector("SecondPatrolPoint", FVector{130,700,0});
 	} 
 	
 	// THIEF
