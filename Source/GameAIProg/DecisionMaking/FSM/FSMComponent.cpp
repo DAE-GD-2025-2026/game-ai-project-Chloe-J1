@@ -40,9 +40,9 @@ UBlackboardComponent* UFSMComponent::GetBlackboard() const
 	return m_blackboard;
 }
 
-void UFSMComponent::SetSteeringAgent(ASteeringAgent* SteeringAgent)
+void UFSMComponent::AddSteeringAgent(ASteeringAgent* SteeringAgent)
 {
-	FSMInstance->SetSteeringAgent(SteeringAgent);
+	FSMInstance->AddSteeringAgent(SteeringAgent);
 }
 
 // Called when the game starts
@@ -56,7 +56,6 @@ void UFSMComponent::BeginPlay()
 void UFSMComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-	// TODO
 	FSMInstance->Tick(DeltaTime);
 }
 
@@ -64,13 +63,11 @@ void UFSMComponent::StartLogic()
 {
 	Super::StartLogic();
 
-	// TODO
 	bIsRunning = true;
 }
 
 void UFSMComponent::StopLogic(const FString& Reason)
 {
-	// TODO
 	bIsRunning = false;
 }
 

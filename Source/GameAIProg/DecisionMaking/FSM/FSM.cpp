@@ -20,6 +20,7 @@ GameAI::FSM::ChaseState::ChaseState()
 
 void GameAI::FSM::ChaseState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
 {
+	GEngine->AddOnScreenDebugMessage(3, 0.f, FColor::Green, TEXT("State: Chase"));
 	AActor* ThiefActor = Cast<AActor>(Blackboard->GetValueAsObject("Thief"));
 	
 	if (ThiefActor == nullptr) return;
@@ -37,8 +38,6 @@ void GameAI::FSM::ChaseState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlac
 	m_steeringBehavior->SetTarget(target);	
 	m_steeringBehavior->CalculateSteering(DeltaTime, Agent);
 	Agent.SetSteeringBehavior(m_steeringBehavior.get());
-	
-	Blackboard->SetValueAsVector("LastSeenPosition", FVector(target.Position, 90));
 }
 
 GameAI::FSM::PatrolState::PatrolState(UBlackboardComponent* Blackboard)
@@ -52,6 +51,7 @@ GameAI::FSM::PatrolState::PatrolState(UBlackboardComponent* Blackboard)
 
 void GameAI::FSM::PatrolState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
 {
+	GEngine->AddOnScreenDebugMessage(3, 0.f, FColor::Green, TEXT("State: Patrol"));
 	if ((FVector2D(Agent.GetActorLocation()) - m_currTargetPos).Length() < 0.01f)
 	{
 		m_patrolIdx++;
@@ -79,18 +79,19 @@ void GameAI::FSM::PatrolState::Tick(float DeltaTime, ASteeringAgent& Agent, UBla
 
 GameAI::FSM::SearchState::SearchState(UBlackboardComponent* Blackboard)
 {
-	m_lastSeenPos = FVector2D(Blackboard->GetValueAsVector("LastSeenPos"));
+	m_steeringBehavior = std::make_unique<Wander>();
+	
 	Blackboard->SetValueAsInt("StartSearchTime", FDateTime::Now().GetSecond());
-	m_steeringBehavior = std::move(m_priority);
 }
 
 void GameAI::FSM::SearchState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
 {
+	GEngine->AddOnScreenDebugMessage(3, 0.f, FColor::Green, TEXT("State: Search"));
 	FTargetData target;
-	target.AngularVelocity = 0;
-	target.LinearVelocity = FVector2D(0, 0);
-	target.Position = m_lastSeenPos;
+	
+	m_steeringBehavior->SetTarget(target);	
 	m_steeringBehavior->CalculateSteering(DeltaTime, Agent);
+	Agent.SetSteeringBehavior(m_steeringBehavior.get());
 }
 
 
@@ -107,7 +108,10 @@ void GameAI::FSM::FSM::Tick(float DeltaTime)
 	if (State* newState = GetStateTransition())
 	 	m_currState = newState;
 	
-	m_currState->Tick(DeltaTime, *m_steeringAgent, m_blackboard);
+	for (const auto& Agent : m_steeringAgents)
+	{
+		m_currState->Tick(DeltaTime, *Agent, m_blackboard);
+	}
 }
 
 void GameAI::FSM::FSM::AddState(std::unique_ptr<State>&& NewState)
@@ -138,8 +142,8 @@ void GameAI::FSM::FSM::SetBlackboard(UBlackboardComponent* Blackboard)
 	m_blackboard = Blackboard;
 }
 
-void GameAI::FSM::FSM::SetSteeringAgent(ASteeringAgent* SteeringAgent)
+void GameAI::FSM::FSM::AddSteeringAgent(ASteeringAgent* SteeringAgent)
 {
-	m_steeringAgent = SteeringAgent;
+	m_steeringAgents.push_back(SteeringAgent);
 }
 

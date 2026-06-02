@@ -20,25 +20,22 @@ void ALevel_FSM::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	// Non-AI agent
+	// THIEF
 	Thief = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
 	FVector{500,100,90}, FRotator::ZeroRotator);
 	Thief->SetDebugRenderingEnabled(false);
 	m_pSeek = std::make_unique<Seek>();
 	Thief->SetSteeringBehavior(m_pSeek.get());
-	// AI agent
+	// GUARD
 	Agent = GetWorld()->SpawnActor<ASteeringAgent>(SteeringAgentClass, 
 	FVector{0,0,90}, FRotator::ZeroRotator);
 	Agent->SetDebugRenderingEnabled(false);
 	
-	
-
-	// TODO
 	if (AGameAIController* AIController = Cast<AGameAIController>(Agent->GetController()))
 	{
 		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
 		{
-			UBlackboardComponent* BlackBoard = FSM->GetBlackboard(); // Note: you can also retrieve blackboard from aicontroller
+			UBlackboardComponent* BlackBoard = FSM->GetBlackboard();
 			BlackBoard->SetValueAsVector("FirstPatrolPoint", FVector{130,-400,0});
 			BlackBoard->SetValueAsVector("SecondPatrolPoint", FVector{130,700,0});
 			BlackBoard->SetValueAsObject("Thief", Thief);
@@ -51,7 +48,7 @@ void ALevel_FSM::BeginPlay()
             	{
             		if (GEngine)
             		{
-            			GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Target visible")));
+            			GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Blue, FString::Printf(TEXT("Target visible")));
             		}
             		return true;
             	}
@@ -69,24 +66,15 @@ void ALevel_FSM::BeginPlay()
 			
 			std::function<bool()> isSearchingTooLong = [BlackBoard]()
 			{
-				const int32 maxSearchTime = 3;
+				const int32 maxSearchTime = 15;
 				FDateTime date = FDateTime::Now();
 				int32 timeNow = date.GetSecond();
 				int32 startTime =  BlackBoard->GetValueAsInt("StartSearchTime");
 				
 				
-				if (abs((timeNow - startTime)) < maxSearchTime)
+				if ((timeNow - startTime) < maxSearchTime)
 				{
-					if (GEngine)
-					{
-						GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Search is over")));
-					}
 					return false;
-				}
-
-				if (GEngine)
-				{
-					GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Blue, FString::Printf(TEXT("Not enough time passed %d %d"), timeNow, startTime));
 				}
 
 				return true;
@@ -103,12 +91,25 @@ void ALevel_FSM::BeginPlay()
 			FSM->AddState(std::move(patrolState));
 			FSM->AddState(std::move(chaseState));
 			FSM->AddState(std::move(searchState));
-			FSM->SetSteeringAgent(Agent);	
+			FSM->AddSteeringAgent(Agent);	
 			AIController->RunFiniteStateMachine();
 			
 			
 		}
 	} 
+	
+	Thief->SetMaxLinearSpeed(900.f);
+	if (AGameAIController* AIController = Cast<AGameAIController>(Thief->GetController()))
+	{
+		if (UFSMComponent* FSM = Cast<UFSMComponent>(AIController->GetBrainComponent()))
+		{
+			std::unique_ptr<GameAI::FSM::PatrolState> patrolState = std::make_unique<GameAI::FSM::PatrolState>(FSM->GetBlackboard());
+			
+			UBlackboardComponent* BlackBoard = FSM->GetBlackboard();
+			FSM->AddSteeringAgent(Thief);	
+			AIController->RunFiniteStateMachine();
+		}
+	}
 }
 
 void ALevel_FSM::SetTarget_Seek()
