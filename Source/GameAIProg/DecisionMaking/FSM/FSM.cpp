@@ -1,16 +1,12 @@
 ﻿#include "FSM.h"
 
+#include "AIController.h"
 #include "Math/UnitConversion.h"
 #include "Movement/SteeringBehaviors/SteeringAgent.h"
 
 //STATES
 GameAI::FSM::State::State()
 {
-}
-
-GameAI::FSM::TestState::TestState()
-{
-	m_steeringBehavior = std::make_unique<Seek>();
 }
 
 GameAI::FSM::ChaseState::ChaseState()
@@ -92,6 +88,34 @@ void GameAI::FSM::SearchState::Tick(float DeltaTime, ASteeringAgent& Agent, UBla
 	m_steeringBehavior->SetTarget(target);	
 	m_steeringBehavior->CalculateSteering(DeltaTime, Agent);
 	Agent.SetSteeringBehavior(m_steeringBehavior.get());
+}
+
+GameAI::FSM::StealState::StealState(UBlackboardComponent* Blackboard)
+{
+	m_treasureLocation = Blackboard->GetValueAsVector("TreasureLocation");
+}
+
+void GameAI::FSM::StealState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
+{
+	AAIController* AIController = Cast<AAIController>(Agent.GetController());
+	if (AIController)
+	{
+		AIController->MoveToLocation(m_treasureLocation);
+	}
+}
+
+void GameAI::FSM::FleeState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
+{
+	AActor* Guard = Cast<AActor>(Blackboard->GetValueAsObject("Guard"));
+	
+	AAIController* AIController = Cast<AAIController>(Agent.GetController());
+	if (AIController)
+	{
+		FVector FleeDirection = (Agent.GetActorLocation() - Guard->GetActorLocation()).GetSafeNormal();
+		FVector FleeTarget = Agent.GetActorLocation() + FleeDirection * 100.f;
+
+		AIController->MoveToLocation(FleeTarget);
+	}
 }
 
 

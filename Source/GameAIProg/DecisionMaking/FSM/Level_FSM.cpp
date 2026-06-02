@@ -81,8 +81,8 @@ void ALevel_FSM::BeginPlay()
 			};
 			
 			std::unique_ptr<GameAI::FSM::ChaseState> chaseState = std::make_unique<GameAI::FSM::ChaseState>();
-			std::unique_ptr<GameAI::FSM::PatrolState> patrolState = std::make_unique<GameAI::FSM::PatrolState>(FSM->GetBlackboard());
-			std::unique_ptr<GameAI::FSM::SearchState> searchState = std::make_unique<GameAI::FSM::SearchState>(FSM->GetBlackboard());
+			std::unique_ptr<GameAI::FSM::PatrolState> patrolState = std::make_unique<GameAI::FSM::PatrolState>(BlackBoard);
+			std::unique_ptr<GameAI::FSM::SearchState> searchState = std::make_unique<GameAI::FSM::SearchState>(BlackBoard);
 			FSM->AddTransition(patrolState.get(), chaseState.get(), isTargetVisible);
 			FSM->AddTransition(chaseState.get(), searchState.get(), notIsTargetVisible);
 			FSM->AddTransition(searchState.get(), chaseState.get(), isTargetVisible);
@@ -106,7 +106,40 @@ void ALevel_FSM::BeginPlay()
 			std::unique_ptr<GameAI::FSM::PatrolState> patrolState = std::make_unique<GameAI::FSM::PatrolState>(FSM->GetBlackboard());
 			
 			UBlackboardComponent* BlackBoard = FSM->GetBlackboard();
-			FSM->AddSteeringAgent(Thief);	
+			BlackBoard->SetValueAsObject("Guard", Agent);
+			std::unique_ptr<GameAI::FSM::StealState> StealState = std::make_unique<GameAI::FSM::StealState>(BlackBoard);
+			std::unique_ptr<GameAI::FSM::FleeState> FleeState = std::make_unique<GameAI::FSM::FleeState>();
+			
+			std::function<bool()> isSpotted = [&]()
+			{
+				const float distance = 250.f;
+				if (((Agent->GetActorLocation() - Thief->GetActorLocation()).GetAbs()).Length() < distance)
+				{
+					if (GEngine)
+					{
+						GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Blue, FString::Printf(TEXT("Spotted")));
+					}
+					return true;
+				}
+				return false;
+			};
+			
+			std::function<bool()> isHidden = [&]()
+			{
+				const float distance = 250.f;
+				if (((Agent->GetActorLocation() - Thief->GetActorLocation()).GetAbs()).Length() < distance)
+				{
+					return false;
+				}
+				return true;
+			};
+			
+			FSM->AddTransition(StealState.get(), FleeState.get(), isSpotted);
+			FSM->AddTransition(FleeState.get(), StealState.get(), isHidden);
+			
+			FSM->AddState(std::move(StealState));
+			FSM->AddState( std::move(FleeState));
+			FSM->AddSteeringAgent(Thief);
 			AIController->RunFiniteStateMachine();
 		}
 	}

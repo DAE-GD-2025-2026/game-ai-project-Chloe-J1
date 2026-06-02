@@ -25,12 +25,6 @@ namespace GameAI::FSM
 		std::unique_ptr<ISteeringBehavior> m_steeringBehavior;
 	};
 	
-	class TestState : public State
-	{
-	public:
-		TestState();
-	};
-	
 	class ChaseState : public State
 	{
 	public:
@@ -62,6 +56,22 @@ namespace GameAI::FSM
 		
 	private:
 		bool m_lastSeenReached{false};
+	};
+	
+	class StealState : public State
+	{
+	public:
+		StealState(UBlackboardComponent* Blackboard);
+		
+		virtual void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard) override;
+	private:
+		FVector m_treasureLocation{};
+	};
+	
+	class FleeState : public State
+	{
+	public:
+		virtual void Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard) override;
 	};
 	// TRANSITION
 	struct Transition
