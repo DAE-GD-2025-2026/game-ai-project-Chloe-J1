@@ -64,19 +64,20 @@ void ALevel_FSM::BeginPlay()
 				return true;
 			};
 			
-			std::function<bool()> isSearchingTooLong = [BlackBoard]()
+			// https://dev.epicgames.com/documentation/unreal-engine/gameplay-timers-in-unreal-engine
+			std::function<bool()> isSearchingTooLong = [&]()
 			{
-				const int32 maxSearchTime = 15;
-				FDateTime date = FDateTime::Now();
-				int32 timeNow = date.GetSecond();
-				int32 startTime =  BlackBoard->GetValueAsInt("StartSearchTime");
+				float deltaTime = GetWorld()->GetDeltaSeconds();
+				constexpr float maxSearchTime = 3.f;
+				m_passedTime += deltaTime;
 				
-				
-				if ((timeNow - startTime) < maxSearchTime)
+				GEngine->AddOnScreenDebugMessage(10, 1.f, FColor::Blue, FString::Printf(TEXT("Passed Time %f"), m_passedTime));
+				if (m_passedTime < maxSearchTime)
 				{
 					return false;
 				}
-
+				
+				m_passedTime = 0;
 				return true;
 			};
 			
@@ -107,6 +108,7 @@ void ALevel_FSM::BeginPlay()
 			
 			UBlackboardComponent* BlackBoard = FSM->GetBlackboard();
 			BlackBoard->SetValueAsObject("Guard", Agent);
+			FVector HideLocation = BlackBoard->GetValueAsVector("HideLocation");
 			std::unique_ptr<GameAI::FSM::StealState> StealState = std::make_unique<GameAI::FSM::StealState>(BlackBoard);
 			std::unique_ptr<GameAI::FSM::FleeState> FleeState = std::make_unique<GameAI::FSM::FleeState>();
 			
@@ -124,18 +126,18 @@ void ALevel_FSM::BeginPlay()
 				return false;
 			};
 			
-			std::function<bool()> isHidden = [&]()
+			std::function<bool()> isSafeLocation = [&]()
 			{
-				const float distance = 250.f;
-				if (((Agent->GetActorLocation() - Thief->GetActorLocation()).GetAbs()).Length() < distance)
+				const float distance = 100.f;
+				if (((Agent->GetActorLocation() - HideLocation).GetAbs()).Length() < distance)
 				{
-					return false;
+					return true;
 				}
-				return true;
+				return false;
 			};
 			
 			FSM->AddTransition(StealState.get(), FleeState.get(), isSpotted);
-			FSM->AddTransition(FleeState.get(), StealState.get(), isHidden);
+			FSM->AddTransition(FleeState.get(), StealState.get(), isSafeLocation);
 			
 			FSM->AddState(std::move(StealState));
 			FSM->AddState( std::move(FleeState));
@@ -149,6 +151,7 @@ void ALevel_FSM::SetTarget_Seek()
 {
 	if (m_pSeek == nullptr) return;
 	m_pSeek->SetTarget(MouseTarget);
+	GEngine->AddOnScreenDebugMessage(10, 1.f, FColor::Blue, FString::Printf(TEXT("%f %f"), MouseTarget.Position.X, MouseTarget.Position.Y));
 }
 
 bool ALevel_FSM::IsTargetVisible()

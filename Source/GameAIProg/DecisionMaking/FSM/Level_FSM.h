@@ -32,5 +32,5 @@ private:
 	std::unique_ptr<Seek> m_pSeek{};
 	void SetTarget_Seek();
 	
-	
+	float m_passedTime{};
 };

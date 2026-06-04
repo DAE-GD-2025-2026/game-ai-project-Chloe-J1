@@ -97,24 +97,20 @@ GameAI::FSM::StealState::StealState(UBlackboardComponent* Blackboard)
 
 void GameAI::FSM::StealState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
 {
-	AAIController* AIController = Cast<AAIController>(Agent.GetController());
-	if (AIController)
+	if (AAIController* AIController = Cast<AAIController>(Agent.GetController()))
 	{
 		AIController->MoveToLocation(m_treasureLocation);
+		GEngine->AddOnScreenDebugMessage(6, 1.f, FColor::Blue, FString::Printf(TEXT("Move to steal")));
 	}
 }
 
 void GameAI::FSM::FleeState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
 {
-	AActor* Guard = Cast<AActor>(Blackboard->GetValueAsObject("Guard"));
-	
-	AAIController* AIController = Cast<AAIController>(Agent.GetController());
-	if (AIController)
+	if (AAIController* AIController = Cast<AAIController>(Agent.GetController()))
 	{
-		FVector FleeDirection = (Agent.GetActorLocation() - Guard->GetActorLocation()).GetSafeNormal();
-		FVector FleeTarget = Agent.GetActorLocation() + FleeDirection * 100.f;
-
-		AIController->MoveToLocation(FleeTarget);
+		FVector HideLocation{Blackboard->GetValueAsVector("HideLocation")};
+		AIController->MoveToLocation(HideLocation, 50.f);
+		GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Blue, FString::Printf(TEXT("%f %f"), HideLocation.X, HideLocation.Y));
 	}
 }
 
