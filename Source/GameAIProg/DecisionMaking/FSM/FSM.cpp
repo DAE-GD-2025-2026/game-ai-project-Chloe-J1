@@ -3,6 +3,7 @@
 #include "AIController.h"
 #include "Math/UnitConversion.h"
 #include "Movement/SteeringBehaviors/SteeringAgent.h"
+#include "Navigation/PathFollowingComponent.h"
 
 //STATES
 GameAI::FSM::State::State()
@@ -76,8 +77,6 @@ void GameAI::FSM::PatrolState::Tick(float DeltaTime, ASteeringAgent& Agent, UBla
 GameAI::FSM::SearchState::SearchState(UBlackboardComponent* Blackboard)
 {
 	m_steeringBehavior = std::make_unique<Wander>();
-	
-	Blackboard->SetValueAsInt("StartSearchTime", FDateTime::Now().GetSecond());
 }
 
 void GameAI::FSM::SearchState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlackboardComponent* Blackboard)
@@ -99,6 +98,7 @@ void GameAI::FSM::StealState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlac
 {
 	if (AAIController* AIController = Cast<AAIController>(Agent.GetController()))
 	{
+		Blackboard->SetValueAsBool("HideSpotReached", false);
 		AIController->MoveToLocation(m_treasureLocation);
 		GEngine->AddOnScreenDebugMessage(6, 1.f, FColor::Blue, FString::Printf(TEXT("Move to steal")));
 	}
@@ -109,7 +109,12 @@ void GameAI::FSM::FleeState::Tick(float DeltaTime, ASteeringAgent& Agent, UBlack
 	if (AAIController* AIController = Cast<AAIController>(Agent.GetController()))
 	{
 		FVector HideLocation{Blackboard->GetValueAsVector("HideLocation")};
-		AIController->MoveToLocation(HideLocation, 50.f);
+		auto result = AIController->MoveToLocation(HideLocation, 50.f);
+		
+		if (result == EPathFollowingResult::Type::Success || result == EPathFollowingResult::Type::Blocked)
+		{
+			Blackboard->SetValueAsBool("HideSpotReached", true);
+		}
 		GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Blue, FString::Printf(TEXT("%f %f"), HideLocation.X, HideLocation.Y));
 	}
 }

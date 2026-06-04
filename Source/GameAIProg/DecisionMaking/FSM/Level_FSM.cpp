@@ -39,7 +39,6 @@ void ALevel_FSM::BeginPlay()
 			BlackBoard->SetValueAsVector("FirstPatrolPoint", FVector{130,-400,0});
 			BlackBoard->SetValueAsVector("SecondPatrolPoint", FVector{130,700,0});
 			BlackBoard->SetValueAsObject("Thief", Thief);
-			BlackBoard->SetValueAsInt("StartSearchTime", FDateTime::Now().GetSecond()); // Initial value, will be overwritten by Search ctor
 			
 			std::function<bool()> isTargetVisible = [&]()
 			{
@@ -126,10 +125,9 @@ void ALevel_FSM::BeginPlay()
 				return false;
 			};
 			
-			std::function<bool()> isSafeLocation = [&]()
+			std::function<bool()> isSafeLocation = [BlackBoard]()
 			{
-				const float distance = 100.f;
-				if (((Agent->GetActorLocation() - HideLocation).GetAbs()).Length() < distance)
+				if (BlackBoard->GetValueAsBool("HideSpotReached"))
 				{
 					return true;
 				}
